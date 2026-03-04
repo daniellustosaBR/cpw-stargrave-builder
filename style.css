@@ -1,0 +1,158 @@
+body {
+  margin: 0;
+  font-family: 'Orbitron', sans-serif;
+  background: linear-gradient(135deg, #0f172a, #020617);
+  color: #e2e8f0;
+}
+
+.main-title {
+  text-align: center;
+  font-size: 22px;
+  margin: 20px 0;
+  letter-spacing: 2px;
+  white-space: nowrap;
+  color: #38bdf8;
+}
+
+/* LAYOUT */
+.container {
+  display: flex;
+  gap: 30px;
+  padding: 20px 40px;
+  align-items: stretch;
+}
+
+.builder {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+.squad {
+  flex: 1;
+  display: flex;
+}
+
+.squad-section {
+  flex: 1;
+}
+
+/* SECTIONS */
+.section {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 15px rgba(0,255,255,0.05);
+}
+
+.builder .section:last-child {
+  margin-bottom: 0;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section h2 {
+  margin: 0;
+}
+
+/* CRÉDITOS */
+.credits-section {
+  border: 1px solid #22c55e;
+  box-shadow: 0 0 10px rgba(34,197,94,0.3);
+}
+
+.credits-value {
+  font-size: 20px;
+  font-weight: bold;
+  color: #22c55e;
+}
+
+/* SOLDIER COUNT */
+#soldier-count {
+  font-size: 14px;
+  color: #94a3b8;
+  margin-left: 8px;
+}
+
+/* SOLDIER LIST */
+.soldier-item {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid #1e293b;
+}
+
+/* BUTTONS */
+button {
+  border: none;
+  padding: 6px 12px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-add {
+  background: #0ea5e9;
+  color: white;
+}
+
+.btn-add:hover {
+  background: #38bdf8;
+}
+
+.btn-remove {
+  background: #dc2626;
+  color: white;
+}
+
+.btn-remove:hover {
+  background: #ef4444;
+}
+
+/* SQUAD SLOTS */
+.squad-section h2 {
+  text-align: center;
+  margin-top: 0;
+}
+
+.squad-slots {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.slot {
+  background: #0f172a;
+  border-radius: 8px;
+  border: 1px solid #1e293b;
+  padding: 10px;
+  min-height: 46px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.slot-label {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+/* Slots obrigatórios */
+.slot-required {
+  border: 1px solid rgba(245, 158, 11, 0.9);
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.15);
+}
+
+.slot-required .slot-label {
+  color: #fbbf24;
+  font-weight: bold;
+}

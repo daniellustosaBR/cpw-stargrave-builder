@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>🚀 CPW STARGRAVE BUILDER 🚀</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h1 class="main-title">🚀 CPW STARGRAVE BUILDER 🚀</h1>
+
+  <div class="container">
+
+    <!-- LEFT SIDE -->
+    <div class="builder">
+
+      <!-- CRÉDITOS -->
+      <div class="section credits-section">
+        <div class="section-header">
+          <h2>CRÉDITOS</h2>
+          <span class="credits-value" id="credits">400</span>
+        </div>
+      </div>
+
+      <!-- CAPTAIN -->
+      <div class="section" id="captain-section">
+        <div class="section-header">
+          <h2>Captain</h2>
+          <button class="btn-add" onclick="addCaptain()">ADICIONAR</button>
+        </div>
+      </div>
+
+      <!-- FIRST MATE -->
+      <div class="section" id="firstmate-section">
+        <div class="section-header">
+          <h2>First Mate</h2>
+          <button class="btn-add" onclick="addFirstMate()">ADICIONAR</button>
+        </div>
+      </div>
+
+      <!-- SOLDIERS -->
+      <div class="section">
+        <div class="section-header">
+          <h2>Soldiers <span id="soldier-count">0 / 8</span></h2>
+        </div>
+
+        <div id="soldier-list"></div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="squad">
+      <div class="section squad-section">
+        <h2>SQUAD</h2>
+
+        <!-- SLOTS OBRIGATÓRIOS -->
+        <div class="squad-slots">
+          <div class="slot slot-required" id="slot-captain">
+            <span class="slot-label">Captain obrigatório</span>
+          </div>
+
+          <div class="slot slot-required" id="slot-firstmate">
+            <span class="slot-label">First Mate obrigatório</span>
+          </div>
+
+          <!-- 8 SLOTS PARA SOLDADOS -->
+          <div class="slot" id="slot-soldier-1"><span class="slot-label">Slot livre</span></div>
+          <div class="slot" id="slot-soldier-2"><span class="slot-label">Slot livre</span></div>
+          <div class="slot" id="slot-soldier-3"><span class="slot-label">Slot livre</span></div>
+          <div class="slot" id="slot-soldier-4"><span class="slot-label">Slot livre</span></div>
+          <div class="slot" id="slot-soldier-5"><span class="slot-label">Slot livre</span></div>
+          <div class="slot" id="slot-soldier-6"><span class="slot-label">Slot livre</span></div>
+          <div class="slot" id="slot-soldier-7"><span class="slot-label">Slot livre</span></div>
+          <div class="slot" id="slot-soldier-8"><span class="slot-label">Slot livre</span></div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
