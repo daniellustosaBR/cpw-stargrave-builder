@@ -1,4 +1,4 @@
-const STORAGE_KEY = "cpw_stargrave_builder_v3";
+const STORAGE_KEY = "cpw_stargrave_builder_v5";
 
 const BASE_CREDITS = 400;
 const MAX_SOLDIERS = 8;
@@ -7,46 +7,14 @@ const captainBase = { Move: 6, Fight: 3, Shoot: 2, Armour: 9, Will: 3, Health: 1
 const firstMateBase = { Move: 6, Fight: 2, Shoot: 2, Armour: 9, Will: 2, Health: 14 };
 
 const backgrounds = [
-  {
-    name: "Biomorph",
-    statMods: { Health: 1, choose2: ["Move", "Fight", "Shoot"] },
-    core: ["Adrenaline Surge","Armour Plates","Camouflage","Fling","Regenerate","Restructure Body","Toxic Claws","Toxic Secretion"]
-  },
-  {
-    name: "Cyborg",
-    statMods: { Health: 1, choose2: ["Move", "Fight", "Shoot"] },
-    core: ["Camouflage","Control Robot","Data Knock","Energy Shield","Power Spike","Quick Step","Target Lock","Temporary Upgrade"]
-  },
-  {
-    name: "Mystic",
-    statMods: { Will: 2, Health: 1, choose1: ["Move", "Fight", "Shoot"] },
-    core: ["Control Animal","Dark Energy","Heal","Life Leach","Mystic Trance","Puppet Master","Suggestion","Void Blade"]
-  },
-  {
-    name: "Robotics Expert",
-    statMods: { Will: 1, choose2: ["Move", "Fight", "Shoot", "Health"] },
-    core: ["Control Robot","Create Robot","Drone","Electromagnetic Pulse","Remote Firing","Remote Guidance","Repair Robot","Re-wire Robot"]
-  },
-  {
-    name: "Rogue",
-    statMods: { Will: 1, Health: 1, choose2: ["Move", "Fight", "Shoot"] },
-    core: ["Bait and Switch","Bribe","Cancel Power","Concealed Firearm","Data Jump","Fortune","Haggle","Quick-Step"]
-  },
-  {
-    name: "Psionicist",
-    statMods: { Will: 2, Health: 1, choose1: ["Move", "Fight", "Shoot"] },
-    core: ["Break Lock","Destroy Weapon","Lift","Psionic Fire","Psychic Shield","Pull","Suggestion","Wall of Force"]
-  },
-  {
-    name: "Tekker",
-    statMods: { Will: 2, choose2: ["Move", "Fight", "Shoot", "Health"] },
-    core: ["Anti-gravity Projection","Data Jump","Data Knock","Data Skip","Drone","Electromagnetic Pulse","Holographic Wall","Transport"]
-  },
-  {
-    name: "Veteran",
-    statMods: { Fight: 1, Health: 1, choose1: ["Move", "Fight", "Shoot"] },
-    core: ["Armoury","Command","Coordinated Fire","Energy Shield","Fortune","Power Spike","Remote Firing","Target Designation"]
-  }
+  { name: "Biomorph", statMods: { Health: 1, choose2: ["Move","Fight","Shoot"] }, core: ["Adrenaline Surge","Armour Plates","Camouflage","Fling","Regenerate","Restructure Body","Toxic Claws","Toxic Secretion"] },
+  { name: "Cyborg", statMods: { Health: 1, choose2: ["Move","Fight","Shoot"] }, core: ["Camouflage","Control Robot","Data Knock","Energy Shield","Power Spike","Quick Step","Target Lock","Temporary Upgrade"] },
+  { name: "Mystic", statMods: { Will: 2, Health: 1, choose1: ["Move","Fight","Shoot"] }, core: ["Control Animal","Dark Energy","Heal","Life Leach","Mystic Trance","Puppet Master","Suggestion","Void Blade"] },
+  { name: "Robotics Expert", statMods: { Will: 1, choose2: ["Move","Fight","Shoot","Health"] }, core: ["Control Robot","Create Robot","Drone","Electromagnetic Pulse","Remote Firing","Remote Guidance","Repair Robot","Re-wire Robot"] },
+  { name: "Rogue", statMods: { Will: 1, Health: 1, choose2: ["Move","Fight","Shoot"] }, core: ["Bait and Switch","Bribe","Cancel Power","Concealed Firearm","Data Jump","Fortune","Haggle","Quick-Step"] },
+  { name: "Psionicist", statMods: { Will: 2, Health: 1, choose1: ["Move","Fight","Shoot"] }, core: ["Break Lock","Destroy Weapon","Lift","Psionic Fire","Psychic Shield","Pull","Suggestion","Wall of Force"] },
+  { name: "Tekker", statMods: { Will: 2, choose2: ["Move","Fight","Shoot","Health"] }, core: ["Anti-gravity Projection","Data Jump","Data Knock","Data Skip","Drone","Electromagnetic Pulse","Holographic Wall","Transport"] },
+  { name: "Veteran", statMods: { Fight: 1, Health: 1, choose1: ["Move","Fight","Shoot"] }, core: ["Armoury","Command","Coordinated Fire","Energy Shield","Fortune","Power Spike","Remote Firing","Target Designation"] }
 ];
 
 const powers = [
@@ -117,16 +85,9 @@ const soldierCatalog = [
   { name: "Armoured Trooper", cost: 150 }
 ];
 
-let state = {
-  credits: BASE_CREDITS,
-  soldiers: [],
-  captain: null,
-  firstMate: null
-};
-
+let state = { credits: BASE_CREDITS, soldiers: [], captain: null, firstMate: null };
 let captainChosen = { choose1: null, choose2: [] };
 let firstMateChosen = { choose1: null, choose2: [] };
-
 let captainSelectedPowers = [];
 let firstMateSelectedPowers = [];
 
@@ -136,12 +97,8 @@ function normalizePowerName(name){ return String(name).trim().toLowerCase(); }
 function getBackground(name){ return backgrounds.find(b=>b.name === name); }
 
 function save(){
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify({ state, captainChosen, firstMateChosen, captainSelectedPowers, firstMateSelectedPowers })
-  );
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ state, captainChosen, firstMateChosen, captainSelectedPowers, firstMateSelectedPowers }));
 }
-
 function load(){
   const raw = localStorage.getItem(STORAGE_KEY);
   if(!raw) return;
@@ -152,9 +109,7 @@ function load(){
     if(data.firstMateChosen) firstMateChosen = data.firstMateChosen;
     if(Array.isArray(data.captainSelectedPowers)) captainSelectedPowers = data.captainSelectedPowers;
     if(Array.isArray(data.firstMateSelectedPowers)) firstMateSelectedPowers = data.firstMateSelectedPowers;
-  }catch(e){
-    console.warn("Falha ao carregar:", e);
-  }
+  }catch(e){ console.warn("Falha ao carregar:", e); }
 }
 
 function setCredits(n){
@@ -162,27 +117,20 @@ function setCredits(n){
   $("credits").textContent = String(state.credits);
   save();
 }
-
-function renderSoldierCount(){
-  $("soldierCount").textContent = String(state.soldiers.length);
-}
+function renderSoldierCount(){ $("soldierCount").textContent = String(state.soldiers.length); }
 
 function statsToGrid(container, stats){
   container.innerHTML = "";
-  const order = ["Move","Fight","Shoot","Armour","Will","Health"];
-  order.forEach(k=>{
+  ["Move","Fight","Shoot","Armour","Will","Health"].forEach(k=>{
     const div = document.createElement("div");
     div.className = "stat";
-
     const left = document.createElement("b");
     left.textContent = k;
-
     const right = document.createElement("span");
     const v = stats[k];
     right.textContent = (k === "Fight" || k === "Shoot" || k === "Will")
       ? (v >= 0 ? `+${v}` : `${v}`)
       : String(v);
-
     div.appendChild(left);
     div.appendChild(right);
     container.appendChild(div);
@@ -194,7 +142,6 @@ function isCorePower(bgName, powerName){
   if(!bg) return false;
   return bg.core.some(p => normalizePowerName(p) === normalizePowerName(powerName));
 }
-
 function powerBaseInfo(powerName){
   return powers.find(p => normalizePowerName(p.name) === normalizePowerName(powerName)) || null;
 }
@@ -202,8 +149,8 @@ function powerBaseInfo(powerName){
 function computeFinalStats(baseStats, bgName, chosen){
   const bg = getBackground(bgName);
   const out = deepCopy(baseStats);
-
   const sm = bg.statMods || {};
+
   if(sm.Move) out.Move += sm.Move;
   if(sm.Fight) out.Fight += sm.Fight;
   if(sm.Shoot) out.Shoot += sm.Shoot;
@@ -212,9 +159,8 @@ function computeFinalStats(baseStats, bgName, chosen){
   if(sm.Health) out.Health += sm.Health;
 
   if(sm.choose1 && chosen?.choose1) out[chosen.choose1] += 1;
-  if(sm.choose2 && Array.isArray(chosen?.choose2)){
-    chosen.choose2.forEach(k => { out[k] += 1; });
-  }
+  if(sm.choose2 && Array.isArray(chosen?.choose2)) chosen.choose2.forEach(k => { out[k] += 1; });
+
   return out;
 }
 
@@ -223,7 +169,6 @@ function activationCaptain(bgName, powerName){
   if(!p) return "—";
   return isCorePower(bgName, powerName) ? p.activation : (p.activation + 2);
 }
-
 function activationFirstMate(bgName, powerName){
   const p = powerBaseInfo(powerName);
   if(!p) return "—";
@@ -240,7 +185,99 @@ function renderBackgroundOptions(selectEl){
   });
 }
 
-/* ===== Stat Modifications UI ===== */
+/* ========= DESCRIÇÕES ========= */
+const powerDescriptions = {
+
+  "Adrenaline Surge": `
+Activation 12 / Strain 2 / Self Only
+
+This figure immediately gains an additional action during this activation,
+and an additional action in their next activation as well.
+`,
+
+  "Anti-gravity Projection": `
+Activation 10 / Strain 0 / Line of Sight
+
+The target figure gains the Levitate attribute (page 156)
+for the rest of the game.
+`,
+
+  "Armour Plates": `
+Activation 10 / Strain 2 / Self Only or Out of Game (B)
+
+The figure gains +2 Armour.
+This power may not be used if the figure is already wearing combat armour.
+
+This power can be used Out of Game (B), in which case the activating
+figure starts the game at -2 Damage to represent the Strain.
+`
+
+};
+
+function powerDescription(name){
+  return powerDescriptions[name] || "Descrição não cadastrada ainda.";
+}
+
+/* ========= TOOLTIP GLOBAL ========= */
+function tooltipEl(){ return $("globalTooltip"); }
+
+function showTooltip(html, x, y){
+  const tip = tooltipEl();
+  tip.innerHTML = html;
+  tip.classList.add("show");
+  tip.setAttribute("aria-hidden", "false");
+
+  // posicionamento inteligente (não sair da tela)
+  const padding = 14;
+  const rect = tip.getBoundingClientRect();
+  let left = x + 14;
+  let top = y + 14;
+
+  const maxLeft = window.innerWidth - rect.width - padding;
+  const maxTop = window.innerHeight - rect.height - padding;
+
+  if(left > maxLeft) left = Math.max(padding, x - rect.width - 14);
+  if(top > maxTop) top = Math.max(padding, y - rect.height - 14);
+
+  tip.style.transform = `translate(${left}px, ${top}px)`;
+}
+
+function hideTooltip(){
+  const tip = tooltipEl();
+  tip.classList.remove("show");
+  tip.setAttribute("aria-hidden", "true");
+  tip.style.transform = `translate(-9999px, -9999px)`;
+  tip.innerHTML = "";
+}
+
+function makeHelpIcon(powerName){
+  const help = document.createElement("span");
+  help.className = "help";
+  help.textContent = "?";
+
+  const base = powerBaseInfo(powerName);
+  const html = `
+    <div style="font-weight:900; margin-bottom:6px;">${powerName}</div>
+    <div style="opacity:.88; margin-bottom:8px;">${powerDescription(powerName)}</div>
+    <div style="opacity:.7; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono','Courier New', monospace;">
+      Base: ${base?.activation ?? "—"} • Strain: ${base?.strain ?? "—"} • ${base?.category ?? "—"}
+    </div>
+  `;
+
+  help.addEventListener("mouseenter", (e)=>{
+    showTooltip(html, e.clientX, e.clientY);
+  });
+  help.addEventListener("mousemove", (e)=>{
+    showTooltip(html, e.clientX, e.clientY);
+  });
+  help.addEventListener("mouseleave", ()=>{
+    hideTooltip();
+  });
+
+  return help;
+}
+
+/* ===== Stat Mod UI ===== */
 function renderStatChoices(targetId, bgName, chosen, onChange){
   const bg = getBackground(bgName);
   const sm = bg.statMods || {};
@@ -338,7 +375,7 @@ function renderStatChoices(targetId, bgName, chosen, onChange){
   }
 }
 
-/* ===== Powers list (Core first) + selected disappears ===== */
+/* ===== Sorting powers ===== */
 function sortedPowersForBackground(bgName, search, selectedArray){
   const q = (search || "").trim().toLowerCase();
   const selectedSet = new Set(selectedArray.map(normalizePowerName));
@@ -348,61 +385,37 @@ function sortedPowersForBackground(bgName, search, selectedArray){
     .filter(p => !selectedSet.has(normalizePowerName(p.name)))
     .map(p => ({ ...p, core: isCorePower(bgName, p.name) }))
     .sort((a,b)=>{
-      if(a.core !== b.core) return a.core ? -1 : 1; // ✅ core no topo
+      if(a.core !== b.core) return a.core ? -1 : 1;
       return a.name.localeCompare(b.name);
     });
 }
 
-/* ===== Validation helpers (enable Add button) ===== */
-function backgroundRequiresChoose1(bgName){
-  const bg = getBackground(bgName);
-  return !!bg?.statMods?.choose1;
-}
-function backgroundRequiresChoose2(bgName){
-  const bg = getBackground(bgName);
-  return !!bg?.statMods?.choose2;
-}
-
+/* ===== Validation ===== */
+function backgroundRequiresChoose1(bgName){ return !!getBackground(bgName)?.statMods?.choose1; }
+function backgroundRequiresChoose2(bgName){ return !!getBackground(bgName)?.statMods?.choose2; }
 function isStatSelectionComplete(bgName, chosen){
-  const need1 = backgroundRequiresChoose1(bgName);
-  const need2 = backgroundRequiresChoose2(bgName);
-
-  if(need1 && !chosen.choose1) return false;
-  if(need2 && (!Array.isArray(chosen.choose2) || chosen.choose2.length !== 2)) return false;
-
+  if(backgroundRequiresChoose1(bgName) && !chosen.choose1) return false;
+  if(backgroundRequiresChoose2(bgName) && (!Array.isArray(chosen.choose2) || chosen.choose2.length !== 2)) return false;
   return true;
 }
-
 function isCaptainReady(){
   const nameOk = ($("captainName").value || "").trim().length > 0;
   const bgName = $("captainBackground").value;
-  const bgOk = !!bgName;
-
   const statsOk = isStatSelectionComplete(bgName, captainChosen);
-
   const powersOk = captainSelectedPowers.length === 5;
   const coreNeed = parseInt($("captainCoreCount").value, 10);
   const coreCount = captainSelectedPowers.filter(p=>isCorePower(bgName, p)).length;
-  const coreOk = powersOk && (coreCount === coreNeed);
-
-  return nameOk && bgOk && statsOk && coreOk;
+  return nameOk && !!bgName && statsOk && powersOk && (coreCount === coreNeed);
 }
-
 function isFirstMateReady(){
   const nameOk = ($("firstMateName").value || "").trim().length > 0;
   const bgName = $("firstMateBackground").value;
-  const bgOk = !!bgName;
-
   const statsOk = isStatSelectionComplete(bgName, firstMateChosen);
-
   const powersOk = firstMateSelectedPowers.length === 4;
   const coreNeed = parseInt($("firstMateCoreCount").value, 10);
   const coreCount = firstMateSelectedPowers.filter(p=>isCorePower(bgName, p)).length;
-  const coreOk = powersOk && (coreCount === coreNeed);
-
-  return nameOk && bgOk && statsOk && coreOk;
+  return nameOk && !!bgName && statsOk && powersOk && (coreCount === coreNeed);
 }
-
 function updateAddButtons(){
   $("addCaptainBtn").disabled = !isCaptainReady() || !!state.captain;
   $("addFirstMateBtn").disabled = !isFirstMateReady() || !!state.firstMate;
@@ -414,37 +427,26 @@ function initCaptain(){
   statsToGrid($("captainBaseStats"), captainBase);
 
   $("captainName").addEventListener("input", updateAddButtons);
-
   $("captainBackground").addEventListener("change", ()=>{
     captainChosen = { choose1: null, choose2: [] };
     captainSelectedPowers = [];
     $("captainPowerSearch").value = "";
     renderCaptainAll();
   });
-
-  $("captainCoreCount").addEventListener("change", ()=>{
-    renderCaptainAll();
-  });
-
+  $("captainCoreCount").addEventListener("change", renderCaptainAll);
   $("captainPowerSearch").addEventListener("input", renderCaptainPowerList);
 
   $("addCaptainBtn").addEventListener("click", ()=>{
-    if(!isCaptainReady()){
-      alert("Preencha todos os requisitos do Captain antes de adicionar.");
-      return;
-    }
-    if(state.captain){ alert("Captain já está no Squad."); return; }
+    if(!isCaptainReady()){ alert("Preencha todos os requisitos do Captain antes de adicionar."); return; }
+    if(state.captain) return;
 
     const name = $("captainName").value.trim();
     const bgName = $("captainBackground").value;
-
     const finalStats = computeFinalStats(captainBase, bgName, captainChosen);
     const gear = $("captainGear").value.trim();
 
     state.captain = {
-      name,
-      background: bgName,
-      statsFinal: finalStats,
+      name, background: bgName, statsFinal: finalStats,
       powers: captainSelectedPowers.map(pn=>({
         name: pn,
         activation: activationCaptain(bgName, pn),
@@ -494,9 +496,12 @@ function renderCaptainPowerList(){
     const left = document.createElement("div");
     left.className = "power-left";
 
+    left.appendChild(makeHelpIcon(p.name));
+
     const name = document.createElement("div");
     name.className = "power-name";
     name.textContent = p.name;
+
     if(p.core){
       const badge = document.createElement("span");
       badge.className = "badge-core";
@@ -504,21 +509,13 @@ function renderCaptainPowerList(){
       name.appendChild(badge);
     }
 
-    const meta = document.createElement("div");
-    meta.className = "power-meta";
-    meta.textContent = `Base: ${p.activation} • Strain: ${p.strain} • ${p.category}`;
-
     left.appendChild(name);
-    left.appendChild(meta);
 
     const btn = document.createElement("button");
-    btn.className = "btn primary";
+    btn.className = "btn power-add";
     btn.textContent = "ADICIONAR";
     btn.addEventListener("click", ()=>{
-      if(captainSelectedPowers.length >= 5){
-        alert("Captain só pode ter 5 powers.");
-        return;
-      }
+      if(captainSelectedPowers.length >= 5){ alert("Captain só pode ter 5 powers."); return; }
       captainSelectedPowers.push(p.name);
       save();
       renderCaptainAll();
@@ -538,7 +535,6 @@ function renderCaptainSelectedList(){
   out.innerHTML = "";
 
   captainSelectedPowers.forEach(pn=>{
-    const p = powerBaseInfo(pn);
     const core = isCorePower(bgName, pn);
 
     const row = document.createElement("div");
@@ -547,9 +543,12 @@ function renderCaptainSelectedList(){
     const left = document.createElement("div");
     left.className = "power-left";
 
+    left.appendChild(makeHelpIcon(pn));
+
     const name = document.createElement("div");
     name.className = "power-name";
     name.textContent = pn;
+
     if(core){
       const badge = document.createElement("span");
       badge.className = "badge-core";
@@ -557,12 +556,7 @@ function renderCaptainSelectedList(){
       name.appendChild(badge);
     }
 
-    const meta = document.createElement("div");
-    meta.className = "power-meta";
-    meta.textContent = `Activation (Captain): ${activationCaptain(bgName,pn)} • Strain: ${p?.strain ?? "—"}`;
-
     left.appendChild(name);
-    left.appendChild(meta);
 
     const btn = document.createElement("button");
     btn.className = "btn danger";
@@ -587,37 +581,26 @@ function initFirstMate(){
   statsToGrid($("firstMateBaseStats"), firstMateBase);
 
   $("firstMateName").addEventListener("input", updateAddButtons);
-
   $("firstMateBackground").addEventListener("change", ()=>{
     firstMateChosen = { choose1: null, choose2: [] };
     firstMateSelectedPowers = [];
     $("firstMatePowerSearch").value = "";
     renderFirstMateAll();
   });
-
-  $("firstMateCoreCount").addEventListener("change", ()=>{
-    renderFirstMateAll();
-  });
-
+  $("firstMateCoreCount").addEventListener("change", renderFirstMateAll);
   $("firstMatePowerSearch").addEventListener("input", renderFirstMatePowerList);
 
   $("addFirstMateBtn").addEventListener("click", ()=>{
-    if(!isFirstMateReady()){
-      alert("Preencha todos os requisitos do First Mate antes de adicionar.");
-      return;
-    }
-    if(state.firstMate){ alert("First Mate já está no Squad."); return; }
+    if(!isFirstMateReady()){ alert("Preencha todos os requisitos do First Mate antes de adicionar."); return; }
+    if(state.firstMate) return;
 
     const name = $("firstMateName").value.trim();
     const bgName = $("firstMateBackground").value;
-
     const finalStats = computeFinalStats(firstMateBase, bgName, firstMateChosen);
     const gear = $("firstMateGear").value.trim();
 
     state.firstMate = {
-      name,
-      background: bgName,
-      statsFinal: finalStats,
+      name, background: bgName, statsFinal: finalStats,
       powers: firstMateSelectedPowers.map(pn=>({
         name: pn,
         activation: activationFirstMate(bgName, pn),
@@ -667,9 +650,12 @@ function renderFirstMatePowerList(){
     const left = document.createElement("div");
     left.className = "power-left";
 
+    left.appendChild(makeHelpIcon(p.name));
+
     const name = document.createElement("div");
     name.className = "power-name";
     name.textContent = p.name;
+
     if(p.core){
       const badge = document.createElement("span");
       badge.className = "badge-core";
@@ -677,21 +663,13 @@ function renderFirstMatePowerList(){
       name.appendChild(badge);
     }
 
-    const meta = document.createElement("div");
-    meta.className = "power-meta";
-    meta.textContent = `Base: ${p.activation} • Strain: ${p.strain} • ${p.category}`;
-
     left.appendChild(name);
-    left.appendChild(meta);
 
     const btn = document.createElement("button");
-    btn.className = "btn primary";
+    btn.className = "btn power-add";
     btn.textContent = "ADICIONAR";
     btn.addEventListener("click", ()=>{
-      if(firstMateSelectedPowers.length >= 4){
-        alert("First Mate só pode ter 4 powers.");
-        return;
-      }
+      if(firstMateSelectedPowers.length >= 4){ alert("First Mate só pode ter 4 powers."); return; }
       firstMateSelectedPowers.push(p.name);
       save();
       renderFirstMateAll();
@@ -711,7 +689,6 @@ function renderFirstMateSelectedList(){
   out.innerHTML = "";
 
   firstMateSelectedPowers.forEach(pn=>{
-    const p = powerBaseInfo(pn);
     const core = isCorePower(bgName, pn);
 
     const row = document.createElement("div");
@@ -720,9 +697,12 @@ function renderFirstMateSelectedList(){
     const left = document.createElement("div");
     left.className = "power-left";
 
+    left.appendChild(makeHelpIcon(pn));
+
     const name = document.createElement("div");
     name.className = "power-name";
     name.textContent = pn;
+
     if(core){
       const badge = document.createElement("span");
       badge.className = "badge-core";
@@ -730,12 +710,7 @@ function renderFirstMateSelectedList(){
       name.appendChild(badge);
     }
 
-    const meta = document.createElement("div");
-    meta.className = "power-meta";
-    meta.textContent = `Activation (First Mate): ${activationFirstMate(bgName,pn)} • Strain: ${p?.strain ?? "—"}`;
-
     left.appendChild(name);
-    left.appendChild(meta);
 
     const btn = document.createElement("button");
     btn.className = "btn danger";
@@ -779,14 +754,8 @@ function renderSoldierCatalog(){
     btn.className = "btn primary";
     btn.textContent = "ADICIONAR";
     btn.addEventListener("click", ()=>{
-      if(state.soldiers.length >= MAX_SOLDIERS){
-        alert("Limite de 8 soldados atingido.");
-        return;
-      }
-      if(state.credits < u.cost){
-        alert("Créditos insuficientes.");
-        return;
-      }
+      if(state.soldiers.length >= MAX_SOLDIERS){ alert("Limite de 8 soldados atingido."); return; }
+      if(state.credits < u.cost){ alert("Créditos insuficientes."); return; }
       state.soldiers.push({ name: u.name, cost: u.cost });
       setCredits(state.credits - u.cost);
       save();
@@ -961,7 +930,6 @@ function renderAll(){
   updateAddButtons();
 }
 
-/* ===== Reset ===== */
 function resetAll(){
   if(!confirm("Resetar tudo? Isso limpa Captain, First Mate, Soldiers e créditos.")) return;
 
@@ -984,6 +952,7 @@ function resetAll(){
   $("captainSection").style.display = "";
   $("firstMateSection").style.display = "";
 
+  hideTooltip();
   renderCaptainAll();
   renderFirstMateAll();
   renderAll();
@@ -991,14 +960,20 @@ function resetAll(){
 
 function init(){
   load();
-
   $("resetBtn").addEventListener("click", resetAll);
+
+  renderBackgroundOptions($("captainBackground"));
+  renderBackgroundOptions($("firstMateBackground"));
 
   initCaptain();
   initFirstMate();
   renderSoldierCatalog();
 
   renderAll();
+
+  // Se o usuário rolar a página enquanto o tooltip está aberto, esconde pra evitar "flutuar no lugar errado"
+  window.addEventListener("scroll", ()=> hideTooltip(), { passive: true });
+  window.addEventListener("resize", ()=> hideTooltip(), { passive: true });
 }
 
 init();
