@@ -197,15 +197,14 @@ body{
   box-shadow: none !important;
 }
 
-/* ✅ Botão azul e menor: reduzir 30% do atual */
+/* ✅ powers add button (azul e bem menor) */
 .btn.power-add{
-  padding: 5px 6px;     /* menor */
+  padding: 5px 6px;
   border-radius: 9px;
   font-size: 11px;
   border-color: rgba(37,99,235,0.55);
   background: linear-gradient(180deg, rgba(37,99,235,0.40), rgba(29,78,216,0.22));
 }
-
 .btn.power-add:hover{
   background: linear-gradient(180deg, rgba(37,99,235,0.52), rgba(29,78,216,0.28));
 }
@@ -354,7 +353,7 @@ body{
   border-radius: 14px;
   background: rgba(0,0,0,0.18);
   max-height: 220px;
-  overflow: auto; /* pode ficar, porque o tooltip agora é global */
+  overflow: auto;
   padding: 8px;
 }
 
@@ -396,7 +395,6 @@ body{
   color: rgba(34,211,238,0.95);
 }
 
-/* ✅ ícone ? (agora só ícone, tooltip é global) */
 .help{
   display:inline-flex;
   align-items:center;
