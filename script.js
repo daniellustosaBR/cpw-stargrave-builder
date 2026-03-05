@@ -1,59 +1,111 @@
-const STARTING_CREDITS = 400;
+const STORAGE_KEY = "cpw_stargrave_builder_v3";
 
-const CAPTAIN_BASE_STATS = { M: 6, F: 3, S: 2, A: 9, W: 3, H: 16 };
+const BASE_CREDITS = 400;
+const MAX_SOLDIERS = 8;
 
-const CAPTAIN_BACKGROUNDS = {
-  Biomorph: {
-    statText: "+1 Health and choose two of the following: +1 Move, +1 Fight, +1 Shoot",
-    fixed: { H: 1 },
-    pick: { count: 2, options: ["M", "F", "S"] },
-    corePowers: ["Adrenaline Surge","Armour Plates","Camouflage","Fling","Regenerate","Restructure Body","Toxic Claws","Toxic Secretion"]
+const captainBase = { Move: 6, Fight: 3, Shoot: 2, Armour: 9, Will: 3, Health: 16 };
+const firstMateBase = { Move: 6, Fight: 2, Shoot: 2, Armour: 9, Will: 2, Health: 14 };
+
+const backgrounds = [
+  {
+    name: "Biomorph",
+    statMods: { Health: 1, choose2: ["Move", "Fight", "Shoot"] },
+    core: ["Adrenaline Surge","Armour Plates","Camouflage","Fling","Regenerate","Restructure Body","Toxic Claws","Toxic Secretion"]
   },
-  Cyborg: {
-    statText: "+1 Health and choose two of the following: +1 Move, +1 Fight, +1 Shoot",
-    fixed: { H: 1 },
-    pick: { count: 2, options: ["M", "F", "S"] },
-    corePowers: ["Camouflage","Control Robot","Data Knock","Energy Shield","Power Spike","Quick Step","Target Lock","Temporary Upgrade"]
+  {
+    name: "Cyborg",
+    statMods: { Health: 1, choose2: ["Move", "Fight", "Shoot"] },
+    core: ["Camouflage","Control Robot","Data Knock","Energy Shield","Power Spike","Quick Step","Target Lock","Temporary Upgrade"]
   },
-  Mystic: {
-    statText: "+2 Will, +1 Health, and choose one of the following: +1 Move, +1 Fight, +1 Shoot",
-    fixed: { W: 2, H: 1 },
-    pick: { count: 1, options: ["M","F","S"] },
-    corePowers: ["Control Animal","Dark Energy","Heal","Life Leach","Mystic Trance","Puppet Master","Suggestion","Void Blade"]
+  {
+    name: "Mystic",
+    statMods: { Will: 2, Health: 1, choose1: ["Move", "Fight", "Shoot"] },
+    core: ["Control Animal","Dark Energy","Heal","Life Leach","Mystic Trance","Puppet Master","Suggestion","Void Blade"]
   },
-  "Robotics Expert": {
-    statText: "+1 Will and choose two of the following: +1 Move, +1 Fight, +1 Shoot, +1 Health",
-    fixed: { W: 1 },
-    pick: { count: 2, options: ["M","F","S","H"] },
-    corePowers: ["Control Robot","Create Robot","Drone","Electromagnetic Pulse","Remote Firing","Remote Guidance","Repair Robot","Re-wire Robot"]
+  {
+    name: "Robotics Expert",
+    statMods: { Will: 1, choose2: ["Move", "Fight", "Shoot", "Health"] },
+    core: ["Control Robot","Create Robot","Drone","Electromagnetic Pulse","Remote Firing","Remote Guidance","Repair Robot","Re-wire Robot"]
   },
-  Rogue: {
-    statText: "+1 Will, +1 Health, and choose two of the following: +1 Move, +1 Fight, +1 Shoot",
-    fixed: { W: 1, H: 1 },
-    pick: { count: 2, options: ["M","F","S"] },
-    corePowers: ["Bait and Switch","Bribe","Cancel Power","Concealed Firearm","Data Jump","Fortune","Haggle","Quick-Step"]
+  {
+    name: "Rogue",
+    statMods: { Will: 1, Health: 1, choose2: ["Move", "Fight", "Shoot"] },
+    core: ["Bait and Switch","Bribe","Cancel Power","Concealed Firearm","Data Jump","Fortune","Haggle","Quick-Step"]
   },
-  Psionicist: {
-    statText: "+2 Will, +1 Health and choose one of the following: +1 Move, +1 Fight, +1 Shoot",
-    fixed: { W: 2, H: 1 },
-    pick: { count: 1, options: ["M","F","S"] },
-    corePowers: ["Break Lock","Destroy Weapon","Lift","Psionic Fire","Psychic Shield","Pull","Suggestion","Wall of Force"]
+  {
+    name: "Psionicist",
+    statMods: { Will: 2, Health: 1, choose1: ["Move", "Fight", "Shoot"] },
+    core: ["Break Lock","Destroy Weapon","Lift","Psionic Fire","Psychic Shield","Pull","Suggestion","Wall of Force"]
   },
-  Tekker: {
-    statText: "+2 Will and choose two of the following: +1 Move, +1 Fight, +1 Shoot, +1 Health",
-    fixed: { W: 2 },
-    pick: { count: 2, options: ["M","F","S","H"] },
-    corePowers: ["Anti-gravity Projection","Data Jump","Data Knock","Data Skip","Drone","Electromagnetic Pulse","Holographic Wall","Transport"]
+  {
+    name: "Tekker",
+    statMods: { Will: 2, choose2: ["Move", "Fight", "Shoot", "Health"] },
+    core: ["Anti-gravity Projection","Data Jump","Data Knock","Data Skip","Drone","Electromagnetic Pulse","Holographic Wall","Transport"]
   },
-  Veteran: {
-    statText: "+1 Fight, +1 Health, and choose one of the following: +1 Move, +1 Fight (for a total of +2), +1 Shoot",
-    fixed: { F: 1, H: 1 },
-    pick: { count: 1, options: ["M","F","S"] },
-    corePowers: ["Armoury","Command","Coordinated Fire","Energy Shield","Fortune","Power Spike","Remote Firing","Target Designation"]
+  {
+    name: "Veteran",
+    statMods: { Fight: 1, Health: 1, choose1: ["Move", "Fight", "Shoot"] },
+    core: ["Armoury","Command","Coordinated Fire","Energy Shield","Fortune","Power Spike","Remote Firing","Target Designation"]
   }
-};
+];
 
-const SOLDIERS = [
+const powers = [
+  {"name":"Adrenaline Surge","activation":12,"strain":2,"category":"Self Only"},
+  {"name":"Anti-gravity Projection","activation":10,"strain":0,"category":"Line of Sight"},
+  {"name":"Armour Plates","activation":10,"strain":2,"category":"Self Only or Out of Game (B)"},
+  {"name":"Armoury","activation":10,"strain":0,"category":"Out of Game (B)"},
+  {"name":"Bait and Switch","activation":12,"strain":2,"category":"Line of Sight"},
+  {"name":"Bribe","activation":14,"strain":0,"category":"Out of Game (B)"},
+  {"name":"Break Lock","activation":12,"strain":1,"category":"Line of Sight"},
+  {"name":"Camouflage","activation":10,"strain":2,"category":"Self Only"},
+  {"name":"Cancel Power","activation":8,"strain":0,"category":"Line of Sight"},
+  {"name":"Command","activation":8,"strain":0,"category":"Line of Sight"},
+  {"name":"Concealed Firearm","activation":10,"strain":0,"category":"Self Only"},
+  {"name":"Control Animal","activation":10,"strain":2,"category":"Line of Sight"},
+  {"name":"Control Robot","activation":10,"strain":1,"category":"Line of Sight"},
+  {"name":"Coordinated Fire","activation":10,"strain":0,"category":"Line of Sight"},
+  {"name":"Create Robot","activation":14,"strain":0,"category":"Out of Game (A)"},
+  {"name":"Dark Energy","activation":10,"strain":1,"category":"Line of Sight"},
+  {"name":"Data Jump","activation":12,"strain":2,"category":"Self Only"},
+  {"name":"Data Knock","activation":10,"strain":1,"category":"Line of Sight"},
+  {"name":"Data Skip","activation":10,"strain":1,"category":"Self Only"},
+  {"name":"Destroy Weapon","activation":10,"strain":1,"category":"Line of Sight"},
+  {"name":"Drone","activation":10,"strain":0,"category":"Out of Game (A)"},
+  {"name":"Electromagnetic Pulse","activation":12,"strain":2,"category":"Area Effect"},
+  {"name":"Energy Shield","activation":10,"strain":2,"category":"Self Only"},
+  {"name":"Fling","activation":12,"strain":2,"category":"Line of Sight"},
+  {"name":"Fortune","activation":10,"strain":0,"category":"Out of Game (B)"},
+  {"name":"Haggle","activation":12,"strain":0,"category":"Out of Game (B)"},
+  {"name":"Heal","activation":8,"strain":1,"category":"Line of Sight"},
+  {"name":"Holographic Wall","activation":10,"strain":2,"category":"Area Effect"},
+  {"name":"Lift","activation":10,"strain":2,"category":"Line of Sight"},
+  {"name":"Life Leach","activation":10,"strain":2,"category":"Line of Sight"},
+  {"name":"Mystic Trance","activation":8,"strain":0,"category":"Self Only"},
+  {"name":"Power Spike","activation":10,"strain":2,"category":"Line of Sight"},
+  {"name":"Psionic Fire","activation":10,"strain":1,"category":"Line of Sight"},
+  {"name":"Psychic Shield","activation":8,"strain":0,"category":"Self Only"},
+  {"name":"Pull","activation":10,"strain":2,"category":"Line of Sight"},
+  {"name":"Puppet Master","activation":14,"strain":3,"category":"Line of Sight"},
+  {"name":"Quick Step","activation":10,"strain":2,"category":"Self Only"},
+  {"name":"Quick-Step","activation":10,"strain":2,"category":"Self Only"},
+  {"name":"Regenerate","activation":10,"strain":2,"category":"Self Only"},
+  {"name":"Remote Firing","activation":10,"strain":1,"category":"Line of Sight"},
+  {"name":"Remote Guidance","activation":10,"strain":1,"category":"Line of Sight"},
+  {"name":"Repair Robot","activation":8,"strain":1,"category":"Line of Sight"},
+  {"name":"Restructure Body","activation":12,"strain":2,"category":"Self Only"},
+  {"name":"Re-wire Robot","activation":10,"strain":2,"category":"Line of Sight"},
+  {"name":"Suggestion","activation":12,"strain":2,"category":"Line of Sight"},
+  {"name":"Target Designation","activation":10,"strain":1,"category":"Line of Sight"},
+  {"name":"Target Lock","activation":10,"strain":1,"category":"Line of Sight"},
+  {"name":"Temporary Upgrade","activation":12,"strain":0,"category":"Out of Game (B)"},
+  {"name":"Toxic Claws","activation":10,"strain":2,"category":"Self Only"},
+  {"name":"Toxic Secretion","activation":10,"strain":2,"category":"Self Only"},
+  {"name":"Transport","activation":12,"strain":2,"category":"Line of Sight"},
+  {"name":"Void Blade","activation":10,"strain":2,"category":"Self Only"},
+  {"name":"Wall of Force","activation":12,"strain":1,"category":"Area Effect"}
+];
+
+const soldierCatalog = [
   { name: "Codebreaker", cost: 75 },
   { name: "Casecracker", cost: 75 },
   { name: "Commando", cost: 75 },
@@ -65,359 +117,888 @@ const SOLDIERS = [
   { name: "Armoured Trooper", cost: 150 }
 ];
 
-let credits = STARTING_CREDITS;
-let captainInSquad = false;
-let firstMateInSquad = false;
-let recruited = [];
-let captainBuild = { name: "", background: "Biomorph", picks: [] };
+let state = {
+  credits: BASE_CREDITS,
+  soldiers: [],
+  captain: null,
+  firstMate: null
+};
 
-const STORAGE_KEY = "cpw_stargrave_builder_v3_fix";
+let captainChosen = { choose1: null, choose2: [] };
+let firstMateChosen = { choose1: null, choose2: [] };
 
-const $ = (id) => document.getElementById(id);
-const bonus = (v) => (v >= 0 ? `+${v}` : `${v}`);
-const statFmt = (key, v) => (key === "F" || key === "S" || key === "W" ? bonus(v) : `${v}`);
+let captainSelectedPowers = [];
+let firstMateSelectedPowers = [];
 
-function saveGame() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ credits, captainInSquad, firstMateInSquad, recruited, captainBuild }));
+function $(id){ return document.getElementById(id); }
+function deepCopy(obj){ return JSON.parse(JSON.stringify(obj)); }
+function normalizePowerName(name){ return String(name).trim().toLowerCase(); }
+function getBackground(name){ return backgrounds.find(b=>b.name === name); }
+
+function save(){
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({ state, captainChosen, firstMateChosen, captainSelectedPowers, firstMateSelectedPowers })
+  );
 }
 
-function loadGame() {
+function load(){
   const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return;
-  try {
+  if(!raw) return;
+  try{
     const data = JSON.parse(raw);
-    credits = typeof data.credits === "number" ? data.credits : STARTING_CREDITS;
-    captainInSquad = !!data.captainInSquad;
-    firstMateInSquad = !!data.firstMateInSquad;
-    recruited = Array.isArray(data.recruited) ? data.recruited : [];
-    captainBuild = data.captainBuild || captainBuild;
-    if (!CAPTAIN_BACKGROUNDS[captainBuild.background]) {
-      captainBuild.background = "Biomorph";
-      captainBuild.picks = [];
-    }
-  } catch {}
+    if(data.state) state = data.state;
+    if(data.captainChosen) captainChosen = data.captainChosen;
+    if(data.firstMateChosen) firstMateChosen = data.firstMateChosen;
+    if(Array.isArray(data.captainSelectedPowers)) captainSelectedPowers = data.captainSelectedPowers;
+    if(Array.isArray(data.firstMateSelectedPowers)) firstMateSelectedPowers = data.firstMateSelectedPowers;
+  }catch(e){
+    console.warn("Falha ao carregar:", e);
+  }
 }
 
-function enforcePickRules() {
-  const bg = CAPTAIN_BACKGROUNDS[captainBuild.background];
-  const max = bg.pick?.count ?? 0;
-  const allowed = new Set(bg.pick?.options ?? []);
-  captainBuild.picks = (captainBuild.picks || []).filter((p) => allowed.has(p));
-  if (captainBuild.picks.length > max) captainBuild.picks = captainBuild.picks.slice(0, max);
+function setCredits(n){
+  state.credits = n;
+  $("credits").textContent = String(state.credits);
+  save();
 }
 
-function computeCaptainFinalStats() {
-  enforcePickRules();
-  const bg = CAPTAIN_BACKGROUNDS[captainBuild.background];
-  const final = { ...CAPTAIN_BASE_STATS };
-  if (bg.fixed) for (const k of Object.keys(bg.fixed)) final[k] += bg.fixed[k];
-  for (const p of (captainBuild.picks || [])) if (final[p] !== undefined) final[p] += 1;
-  return final;
+function renderSoldierCount(){
+  $("soldierCount").textContent = String(state.soldiers.length);
 }
 
-function updateCaptainStatsUI() {
-  const f = computeCaptainFinalStats();
-  $("finalM").textContent = statFmt("M", f.M);
-  $("finalF").textContent = statFmt("F", f.F);
-  $("finalS").textContent = statFmt("S", f.S);
-  $("finalA").textContent = statFmt("A", f.A);
-  $("finalW").textContent = statFmt("W", f.W);
-  $("finalH").textContent = statFmt("H", f.H);
-}
+function statsToGrid(container, stats){
+  container.innerHTML = "";
+  const order = ["Move","Fight","Shoot","Armour","Will","Health"];
+  order.forEach(k=>{
+    const div = document.createElement("div");
+    div.className = "stat";
 
-function renderBackgroundDropdown() {
-  const sel = $("captainBackground");
-  sel.innerHTML = "";
-  Object.keys(CAPTAIN_BACKGROUNDS).forEach((name) => {
-    const opt = document.createElement("option");
-    opt.value = name;
-    opt.textContent = name;
-    sel.appendChild(opt);
+    const left = document.createElement("b");
+    left.textContent = k;
+
+    const right = document.createElement("span");
+    const v = stats[k];
+    right.textContent = (k === "Fight" || k === "Shoot" || k === "Will")
+      ? (v >= 0 ? `+${v}` : `${v}`)
+      : String(v);
+
+    div.appendChild(left);
+    div.appendChild(right);
+    container.appendChild(div);
   });
-  sel.value = captainBuild.background;
 }
 
-function renderBackgroundDetails() {
-  const bg = CAPTAIN_BACKGROUNDS[captainBuild.background];
-  const container = $("bgDetails");
+function isCorePower(bgName, powerName){
+  const bg = getBackground(bgName);
+  if(!bg) return false;
+  return bg.core.some(p => normalizePowerName(p) === normalizePowerName(powerName));
+}
+
+function powerBaseInfo(powerName){
+  return powers.find(p => normalizePowerName(p.name) === normalizePowerName(powerName)) || null;
+}
+
+function computeFinalStats(baseStats, bgName, chosen){
+  const bg = getBackground(bgName);
+  const out = deepCopy(baseStats);
+
+  const sm = bg.statMods || {};
+  if(sm.Move) out.Move += sm.Move;
+  if(sm.Fight) out.Fight += sm.Fight;
+  if(sm.Shoot) out.Shoot += sm.Shoot;
+  if(sm.Armour) out.Armour += sm.Armour;
+  if(sm.Will) out.Will += sm.Will;
+  if(sm.Health) out.Health += sm.Health;
+
+  if(sm.choose1 && chosen?.choose1) out[chosen.choose1] += 1;
+  if(sm.choose2 && Array.isArray(chosen?.choose2)){
+    chosen.choose2.forEach(k => { out[k] += 1; });
+  }
+  return out;
+}
+
+function activationCaptain(bgName, powerName){
+  const p = powerBaseInfo(powerName);
+  if(!p) return "—";
+  return isCorePower(bgName, powerName) ? p.activation : (p.activation + 2);
+}
+
+function activationFirstMate(bgName, powerName){
+  const p = powerBaseInfo(powerName);
+  if(!p) return "—";
+  return isCorePower(bgName, powerName) ? (p.activation + 2) : (p.activation + 4);
+}
+
+function renderBackgroundOptions(selectEl){
+  selectEl.innerHTML = "";
+  backgrounds.forEach(bg=>{
+    const opt = document.createElement("option");
+    opt.value = bg.name;
+    opt.textContent = bg.name;
+    selectEl.appendChild(opt);
+  });
+}
+
+/* ===== Stat Modifications UI ===== */
+function renderStatChoices(targetId, bgName, chosen, onChange){
+  const bg = getBackground(bgName);
+  const sm = bg.statMods || {};
+  const container = $(targetId);
   container.innerHTML = "";
 
-  const statBlock = document.createElement("div");
-  statBlock.className = "kv";
-  statBlock.innerHTML = `<div class="k">Stat Modifications</div><div class="v">${bg.statText}</div>`;
-  container.appendChild(statBlock);
+  const fixedKeys = ["Move","Fight","Shoot","Armour","Will","Health"].filter(k => sm[k]);
 
-  if (bg.pick && bg.pick.count > 0) {
-    const wrap = document.createElement("div");
-    wrap.className = "kv";
-    wrap.innerHTML = `<div class="k">Escolhas</div><div class="v">Selecione <b>${bg.pick.count}</b>: <div class="choice-row" id="pickRow"></div></div>`;
-    container.appendChild(wrap);
+  if(fixedKeys.length){
+    const fixed = document.createElement("div");
+    fixed.className = "choice-group";
+    fixed.innerHTML = `<div class="choice-title">Fixos</div>`;
+    const row = document.createElement("div");
+    row.className = "choice-row";
+    fixedKeys.forEach(k=>{
+      const pill = document.createElement("div");
+      pill.className = "pill-option";
+      pill.innerHTML = `<span>${k} ${sm[k] >= 0 ? `+${sm[k]}` : sm[k]}</span>`;
+      row.appendChild(pill);
+    });
+    fixed.appendChild(row);
+    container.appendChild(fixed);
+  }
 
-    const pickRow = wrap.querySelector("#pickRow");
+  if(sm.choose1){
+    const g = document.createElement("div");
+    g.className = "choice-group";
+    g.innerHTML = `<div class="choice-title">Escolha 1 (+1)</div>`;
+    const row = document.createElement("div");
+    row.className = "choice-row";
 
-    bg.pick.options.forEach((key) => {
+    sm.choose1.forEach(opt=>{
       const label = document.createElement("label");
-      label.className = "choice";
-      const input = document.createElement("input");
-      input.type = "checkbox";
-      input.checked = (captainBuild.picks || []).includes(key);
+      label.className = "pill-option";
 
-      input.addEventListener("change", () => {
-        const set = new Set(captainBuild.picks || []);
-        if (input.checked) set.add(key);
-        else set.delete(key);
-        captainBuild.picks = Array.from(set);
-        enforcePickRules();
-        renderBackgroundDetails();
-        updateCaptainStatsUI();
-        saveGame();
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = `${targetId}_choose1`;
+      input.checked = chosen.choose1 === opt;
+
+      input.addEventListener("change", ()=>{
+        chosen.choose1 = opt;
+        onChange();
       });
 
-      const txt = key === "M" ? "Move +1" : key === "F" ? "Fight +1" : key === "S" ? "Shoot +1" : "Health +1";
       label.appendChild(input);
-      label.appendChild(document.createTextNode(txt));
-      pickRow.appendChild(label);
+      label.appendChild(document.createTextNode(`${opt} +1`));
+      row.appendChild(label);
     });
+
+    g.appendChild(row);
+    container.appendChild(g);
   }
 
-  const powers = document.createElement("div");
-  powers.className = "kv";
-  powers.innerHTML = `<div class="k">Core Powers</div><div class="v">${bg.corePowers.join(", ")}</div>`;
-  container.appendChild(powers);
+  if(sm.choose2){
+    const g = document.createElement("div");
+    g.className = "choice-group";
+    g.innerHTML = `<div class="choice-title">Escolha 2 (+1 cada)</div>`;
+    const row = document.createElement("div");
+    row.className = "choice-row";
+
+    sm.choose2.forEach(opt=>{
+      const label = document.createElement("label");
+      label.className = "pill-option";
+
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.checked = chosen.choose2.includes(opt);
+
+      input.addEventListener("change", ()=>{
+        if(input.checked){
+          if(chosen.choose2.length >= 2){
+            input.checked = false;
+            alert("Você deve escolher exatamente 2 opções aqui.");
+            return;
+          }
+          chosen.choose2.push(opt);
+        }else{
+          chosen.choose2 = chosen.choose2.filter(x=>x !== opt);
+        }
+        onChange();
+      });
+
+      label.appendChild(input);
+      label.appendChild(document.createTextNode(`${opt} +1`));
+      row.appendChild(label);
+    });
+
+    g.appendChild(row);
+    container.appendChild(g);
+  }
+
+  if(!fixedKeys.length && !sm.choose1 && !sm.choose2){
+    container.innerHTML = `<div class="muted small">Sem modificações especiais.</div>`;
+  }
 }
 
-function makeSlot(id, title, subtitle, highlight) {
-  const slot = document.createElement("div");
-  slot.className = `slot ${highlight ? "highlight" : ""}`;
-  slot.id = id;
+/* ===== Powers list (Core first) + selected disappears ===== */
+function sortedPowersForBackground(bgName, search, selectedArray){
+  const q = (search || "").trim().toLowerCase();
+  const selectedSet = new Set(selectedArray.map(normalizePowerName));
 
-  const left = document.createElement("div");
-  left.className = "slot-left";
-  left.innerHTML = `<div class="slot-title">${title}</div><div class="slot-sub">${subtitle}</div>`;
-
-  const right = document.createElement("div");
-  right.className = "slot-right";
-
-  slot.appendChild(left);
-  slot.appendChild(right);
-  return slot;
+  return powers
+    .filter(p => !q || p.name.toLowerCase().includes(q))
+    .filter(p => !selectedSet.has(normalizePowerName(p.name)))
+    .map(p => ({ ...p, core: isCorePower(bgName, p.name) }))
+    .sort((a,b)=>{
+      if(a.core !== b.core) return a.core ? -1 : 1; // ✅ core no topo
+      return a.name.localeCompare(b.name);
+    });
 }
 
-function setSlotContent(slotId, title, subtitle, removeHandler, removeLabel = "REMOVER") {
-  const slot = $(slotId);
-  if (!slot) return;
+/* ===== Validation helpers (enable Add button) ===== */
+function backgroundRequiresChoose1(bgName){
+  const bg = getBackground(bgName);
+  return !!bg?.statMods?.choose1;
+}
+function backgroundRequiresChoose2(bgName){
+  const bg = getBackground(bgName);
+  return !!bg?.statMods?.choose2;
+}
 
-  slot.querySelector(".slot-title").textContent = title;
-  slot.querySelector(".slot-sub").textContent = subtitle;
+function isStatSelectionComplete(bgName, chosen){
+  const need1 = backgroundRequiresChoose1(bgName);
+  const need2 = backgroundRequiresChoose2(bgName);
 
-  const right = slot.querySelector(".slot-right");
-  right.innerHTML = "";
+  if(need1 && !chosen.choose1) return false;
+  if(need2 && (!Array.isArray(chosen.choose2) || chosen.choose2.length !== 2)) return false;
 
-  if (removeHandler) {
+  return true;
+}
+
+function isCaptainReady(){
+  const nameOk = ($("captainName").value || "").trim().length > 0;
+  const bgName = $("captainBackground").value;
+  const bgOk = !!bgName;
+
+  const statsOk = isStatSelectionComplete(bgName, captainChosen);
+
+  const powersOk = captainSelectedPowers.length === 5;
+  const coreNeed = parseInt($("captainCoreCount").value, 10);
+  const coreCount = captainSelectedPowers.filter(p=>isCorePower(bgName, p)).length;
+  const coreOk = powersOk && (coreCount === coreNeed);
+
+  return nameOk && bgOk && statsOk && coreOk;
+}
+
+function isFirstMateReady(){
+  const nameOk = ($("firstMateName").value || "").trim().length > 0;
+  const bgName = $("firstMateBackground").value;
+  const bgOk = !!bgName;
+
+  const statsOk = isStatSelectionComplete(bgName, firstMateChosen);
+
+  const powersOk = firstMateSelectedPowers.length === 4;
+  const coreNeed = parseInt($("firstMateCoreCount").value, 10);
+  const coreCount = firstMateSelectedPowers.filter(p=>isCorePower(bgName, p)).length;
+  const coreOk = powersOk && (coreCount === coreNeed);
+
+  return nameOk && bgOk && statsOk && coreOk;
+}
+
+function updateAddButtons(){
+  $("addCaptainBtn").disabled = !isCaptainReady() || !!state.captain;
+  $("addFirstMateBtn").disabled = !isFirstMateReady() || !!state.firstMate;
+}
+
+/* ===== Captain ===== */
+function initCaptain(){
+  renderBackgroundOptions($("captainBackground"));
+  statsToGrid($("captainBaseStats"), captainBase);
+
+  $("captainName").addEventListener("input", updateAddButtons);
+
+  $("captainBackground").addEventListener("change", ()=>{
+    captainChosen = { choose1: null, choose2: [] };
+    captainSelectedPowers = [];
+    $("captainPowerSearch").value = "";
+    renderCaptainAll();
+  });
+
+  $("captainCoreCount").addEventListener("change", ()=>{
+    renderCaptainAll();
+  });
+
+  $("captainPowerSearch").addEventListener("input", renderCaptainPowerList);
+
+  $("addCaptainBtn").addEventListener("click", ()=>{
+    if(!isCaptainReady()){
+      alert("Preencha todos os requisitos do Captain antes de adicionar.");
+      return;
+    }
+    if(state.captain){ alert("Captain já está no Squad."); return; }
+
+    const name = $("captainName").value.trim();
+    const bgName = $("captainBackground").value;
+
+    const finalStats = computeFinalStats(captainBase, bgName, captainChosen);
+    const gear = $("captainGear").value.trim();
+
+    state.captain = {
+      name,
+      background: bgName,
+      statsFinal: finalStats,
+      powers: captainSelectedPowers.map(pn=>({
+        name: pn,
+        activation: activationCaptain(bgName, pn),
+        strain: powerBaseInfo(pn)?.strain ?? "—",
+        core: isCorePower(bgName, pn)
+      })),
+      gear
+    };
+
+    save();
+    renderAll();
+    $("captainSection").style.display = "none";
+  });
+
+  renderCaptainAll();
+}
+
+function renderCaptainAll(){
+  const bgName = $("captainBackground").value;
+
+  renderStatChoices("captainStatChoices", bgName, captainChosen, ()=>{
+    renderCaptainAll();
+    save();
+  });
+
+  const finalStats = computeFinalStats(captainBase, bgName, captainChosen);
+  statsToGrid($("captainFinalStats"), finalStats);
+
+  renderCaptainPowerList();
+  renderCaptainSelectedList();
+  updateAddButtons();
+}
+
+function renderCaptainPowerList(){
+  const bgName = $("captainBackground").value;
+  const search = $("captainPowerSearch").value;
+
+  const listEl = $("captainPowerList");
+  listEl.innerHTML = "";
+
+  const list = sortedPowersForBackground(bgName, search, captainSelectedPowers);
+
+  list.forEach(p=>{
+    const row = document.createElement("div");
+    row.className = "power-item";
+
+    const left = document.createElement("div");
+    left.className = "power-left";
+
+    const name = document.createElement("div");
+    name.className = "power-name";
+    name.textContent = p.name;
+    if(p.core){
+      const badge = document.createElement("span");
+      badge.className = "badge-core";
+      badge.textContent = "CORE";
+      name.appendChild(badge);
+    }
+
+    const meta = document.createElement("div");
+    meta.className = "power-meta";
+    meta.textContent = `Base: ${p.activation} • Strain: ${p.strain} • ${p.category}`;
+
+    left.appendChild(name);
+    left.appendChild(meta);
+
     const btn = document.createElement("button");
-    btn.className = "btn btn-danger";
-    btn.textContent = removeLabel;
-    btn.onclick = removeHandler;
-    right.appendChild(btn);
-  }
+    btn.className = "btn primary";
+    btn.textContent = "ADICIONAR";
+    btn.addEventListener("click", ()=>{
+      if(captainSelectedPowers.length >= 5){
+        alert("Captain só pode ter 5 powers.");
+        return;
+      }
+      captainSelectedPowers.push(p.name);
+      save();
+      renderCaptainAll();
+    });
+
+    row.appendChild(left);
+    row.appendChild(btn);
+    listEl.appendChild(row);
+  });
+
+  updateAddButtons();
 }
 
-function buildSquadSlots() {
-  const grid = $("squadGrid");
-  grid.innerHTML = "";
-  grid.appendChild(makeSlot("captainSlot", "CAPTAIN", "Captain obrigatório", true));
-  grid.appendChild(makeSlot("firstMateSlot", "FIRST MATE", "First Mate obrigatório", true));
-  for (let i = 0; i < 8; i++) grid.appendChild(makeSlot(`soldierSlot_${i}`, `SOLDIER ${i + 1}`, "Vazio", false));
+function renderCaptainSelectedList(){
+  const bgName = $("captainBackground").value;
+  const out = $("captainSelectedPowers");
+  out.innerHTML = "";
+
+  captainSelectedPowers.forEach(pn=>{
+    const p = powerBaseInfo(pn);
+    const core = isCorePower(bgName, pn);
+
+    const row = document.createElement("div");
+    row.className = "power-item";
+
+    const left = document.createElement("div");
+    left.className = "power-left";
+
+    const name = document.createElement("div");
+    name.className = "power-name";
+    name.textContent = pn;
+    if(core){
+      const badge = document.createElement("span");
+      badge.className = "badge-core";
+      badge.textContent = "CORE";
+      name.appendChild(badge);
+    }
+
+    const meta = document.createElement("div");
+    meta.className = "power-meta";
+    meta.textContent = `Activation (Captain): ${activationCaptain(bgName,pn)} • Strain: ${p?.strain ?? "—"}`;
+
+    left.appendChild(name);
+    left.appendChild(meta);
+
+    const btn = document.createElement("button");
+    btn.className = "btn danger";
+    btn.textContent = "REMOVER";
+    btn.addEventListener("click", ()=>{
+      captainSelectedPowers = captainSelectedPowers.filter(x=>x !== pn);
+      save();
+      renderCaptainAll();
+    });
+
+    row.appendChild(left);
+    row.appendChild(btn);
+    out.appendChild(row);
+  });
+
+  updateAddButtons();
 }
 
-function renderSoldierCatalog() {
+/* ===== First Mate ===== */
+function initFirstMate(){
+  renderBackgroundOptions($("firstMateBackground"));
+  statsToGrid($("firstMateBaseStats"), firstMateBase);
+
+  $("firstMateName").addEventListener("input", updateAddButtons);
+
+  $("firstMateBackground").addEventListener("change", ()=>{
+    firstMateChosen = { choose1: null, choose2: [] };
+    firstMateSelectedPowers = [];
+    $("firstMatePowerSearch").value = "";
+    renderFirstMateAll();
+  });
+
+  $("firstMateCoreCount").addEventListener("change", ()=>{
+    renderFirstMateAll();
+  });
+
+  $("firstMatePowerSearch").addEventListener("input", renderFirstMatePowerList);
+
+  $("addFirstMateBtn").addEventListener("click", ()=>{
+    if(!isFirstMateReady()){
+      alert("Preencha todos os requisitos do First Mate antes de adicionar.");
+      return;
+    }
+    if(state.firstMate){ alert("First Mate já está no Squad."); return; }
+
+    const name = $("firstMateName").value.trim();
+    const bgName = $("firstMateBackground").value;
+
+    const finalStats = computeFinalStats(firstMateBase, bgName, firstMateChosen);
+    const gear = $("firstMateGear").value.trim();
+
+    state.firstMate = {
+      name,
+      background: bgName,
+      statsFinal: finalStats,
+      powers: firstMateSelectedPowers.map(pn=>({
+        name: pn,
+        activation: activationFirstMate(bgName, pn),
+        strain: powerBaseInfo(pn)?.strain ?? "—",
+        core: isCorePower(bgName, pn)
+      })),
+      gear
+    };
+
+    save();
+    renderAll();
+    $("firstMateSection").style.display = "none";
+  });
+
+  renderFirstMateAll();
+}
+
+function renderFirstMateAll(){
+  const bgName = $("firstMateBackground").value;
+
+  renderStatChoices("firstMateStatChoices", bgName, firstMateChosen, ()=>{
+    renderFirstMateAll();
+    save();
+  });
+
+  const finalStats = computeFinalStats(firstMateBase, bgName, firstMateChosen);
+  statsToGrid($("firstMateFinalStats"), finalStats);
+
+  renderFirstMatePowerList();
+  renderFirstMateSelectedList();
+  updateAddButtons();
+}
+
+function renderFirstMatePowerList(){
+  const bgName = $("firstMateBackground").value;
+  const search = $("firstMatePowerSearch").value;
+
+  const listEl = $("firstMatePowerList");
+  listEl.innerHTML = "";
+
+  const list = sortedPowersForBackground(bgName, search, firstMateSelectedPowers);
+
+  list.forEach(p=>{
+    const row = document.createElement("div");
+    row.className = "power-item";
+
+    const left = document.createElement("div");
+    left.className = "power-left";
+
+    const name = document.createElement("div");
+    name.className = "power-name";
+    name.textContent = p.name;
+    if(p.core){
+      const badge = document.createElement("span");
+      badge.className = "badge-core";
+      badge.textContent = "CORE";
+      name.appendChild(badge);
+    }
+
+    const meta = document.createElement("div");
+    meta.className = "power-meta";
+    meta.textContent = `Base: ${p.activation} • Strain: ${p.strain} • ${p.category}`;
+
+    left.appendChild(name);
+    left.appendChild(meta);
+
+    const btn = document.createElement("button");
+    btn.className = "btn primary";
+    btn.textContent = "ADICIONAR";
+    btn.addEventListener("click", ()=>{
+      if(firstMateSelectedPowers.length >= 4){
+        alert("First Mate só pode ter 4 powers.");
+        return;
+      }
+      firstMateSelectedPowers.push(p.name);
+      save();
+      renderFirstMateAll();
+    });
+
+    row.appendChild(left);
+    row.appendChild(btn);
+    listEl.appendChild(row);
+  });
+
+  updateAddButtons();
+}
+
+function renderFirstMateSelectedList(){
+  const bgName = $("firstMateBackground").value;
+  const out = $("firstMateSelectedPowers");
+  out.innerHTML = "";
+
+  firstMateSelectedPowers.forEach(pn=>{
+    const p = powerBaseInfo(pn);
+    const core = isCorePower(bgName, pn);
+
+    const row = document.createElement("div");
+    row.className = "power-item";
+
+    const left = document.createElement("div");
+    left.className = "power-left";
+
+    const name = document.createElement("div");
+    name.className = "power-name";
+    name.textContent = pn;
+    if(core){
+      const badge = document.createElement("span");
+      badge.className = "badge-core";
+      badge.textContent = "CORE";
+      name.appendChild(badge);
+    }
+
+    const meta = document.createElement("div");
+    meta.className = "power-meta";
+    meta.textContent = `Activation (First Mate): ${activationFirstMate(bgName,pn)} • Strain: ${p?.strain ?? "—"}`;
+
+    left.appendChild(name);
+    left.appendChild(meta);
+
+    const btn = document.createElement("button");
+    btn.className = "btn danger";
+    btn.textContent = "REMOVER";
+    btn.addEventListener("click", ()=>{
+      firstMateSelectedPowers = firstMateSelectedPowers.filter(x=>x !== pn);
+      save();
+      renderFirstMateAll();
+    });
+
+    row.appendChild(left);
+    row.appendChild(btn);
+    out.appendChild(row);
+  });
+
+  updateAddButtons();
+}
+
+/* ===== Soldiers ===== */
+function renderSoldierCatalog(){
   const wrap = $("soldierCatalog");
   wrap.innerHTML = "";
-  SOLDIERS.forEach((u) => {
+
+  soldierCatalog.forEach(u=>{
     const row = document.createElement("div");
     row.className = "unit-row";
-    row.innerHTML = `<div><span class="unit-name">${u.name}</span> <span class="unit-cost">(${u.cost}cr)</span></div>`;
+
+    const left = document.createElement("div");
+    const name = document.createElement("div");
+    name.className = "unit-name";
+    name.textContent = `${u.name}`;
+
+    const cost = document.createElement("div");
+    cost.className = "unit-cost";
+    cost.textContent = `(${u.cost}cr)`;
+
+    left.appendChild(name);
+    left.appendChild(cost);
+
     const btn = document.createElement("button");
-    btn.className = "btn btn-primary";
+    btn.className = "btn primary";
     btn.textContent = "ADICIONAR";
-    btn.onclick = () => addSoldier(u);
+    btn.addEventListener("click", ()=>{
+      if(state.soldiers.length >= MAX_SOLDIERS){
+        alert("Limite de 8 soldados atingido.");
+        return;
+      }
+      if(state.credits < u.cost){
+        alert("Créditos insuficientes.");
+        return;
+      }
+      state.soldiers.push({ name: u.name, cost: u.cost });
+      setCredits(state.credits - u.cost);
+      save();
+      renderAll();
+    });
+
+    row.appendChild(left);
     row.appendChild(btn);
     wrap.appendChild(row);
   });
 }
 
-function addCaptain() {
-  if (captainInSquad) return;
-  captainInSquad = true;
-  $("btnAddCaptain").disabled = true;
+/* ===== Squad ===== */
+function renderCaptainSlot(){
+  const body = $("captainSlotBody");
+  body.innerHTML = "";
+  if(!state.captain) return;
 
-  const capName = ($("captainName").value || "").trim();
-  captainBuild.name = capName;
+  const card = document.createElement("div");
+  card.className = "squad-card-item";
 
-  const bg = captainBuild.background;
-  const s = computeCaptainFinalStats();
+  const head = document.createElement("div");
+  head.className = "item-head";
 
-  const subtitle =
-    `${capName ? capName + " · " : ""}${bg} · ` +
-    `Move ${s.M} · Fight ${bonus(s.F)} · Shoot ${bonus(s.S)} · Armour ${s.A} · Will ${bonus(s.W)} · Health ${s.H}`;
+  const left = document.createElement("div");
+  const title = document.createElement("div");
+  title.className = "item-title";
+  title.textContent = `${state.captain.name} • ${state.captain.background}`;
 
-  setSlotContent("captainSlot", "CAPTAIN", subtitle, removeCaptain);
-  updateDisplay();
-  saveGame();
+  const sub = document.createElement("div");
+  sub.className = "item-sub";
+  const s = state.captain.statsFinal;
+  sub.textContent = `Move ${s.Move} | Fight +${s.Fight} | Shoot +${s.Shoot} | Armour ${s.Armour} | Will +${s.Will} | Health ${s.Health}`;
+
+  left.appendChild(title);
+  left.appendChild(sub);
+
+  const btn = document.createElement("button");
+  btn.className = "btn danger";
+  btn.textContent = "REMOVER";
+  btn.addEventListener("click", ()=>{
+    state.captain = null;
+    save();
+    $("captainSection").style.display = "";
+    renderAll();
+  });
+
+  head.appendChild(left);
+  head.appendChild(btn);
+
+  const pows = document.createElement("div");
+  pows.className = "item-powers";
+  pows.innerHTML = `<b>Powers:</b> ${state.captain.powers.map(p=>`${p.name} (${p.activation})`).join(", ")}`;
+
+  const gear = document.createElement("div");
+  gear.className = "item-gear";
+  gear.innerHTML = `<b>Equip:</b> ${state.captain.gear ? state.captain.gear : "<span class='muted'>[vazio]</span>"}`;
+
+  card.appendChild(head);
+  card.appendChild(pows);
+  card.appendChild(gear);
+  body.appendChild(card);
 }
 
-function removeCaptain() {
-  captainInSquad = false;
-  $("btnAddCaptain").disabled = false;
-  setSlotContent("captainSlot", "CAPTAIN", "Captain obrigatório", null);
-  updateDisplay();
-  saveGame();
+function renderFirstMateSlot(){
+  const body = $("firstMateSlotBody");
+  body.innerHTML = "";
+  if(!state.firstMate) return;
+
+  const card = document.createElement("div");
+  card.className = "squad-card-item";
+
+  const head = document.createElement("div");
+  head.className = "item-head";
+
+  const left = document.createElement("div");
+  const title = document.createElement("div");
+  title.className = "item-title";
+  title.textContent = `${state.firstMate.name} • ${state.firstMate.background}`;
+
+  const sub = document.createElement("div");
+  sub.className = "item-sub";
+  const s = state.firstMate.statsFinal;
+  sub.textContent = `Move ${s.Move} | Fight +${s.Fight} | Shoot +${s.Shoot} | Armour ${s.Armour} | Will +${s.Will} | Health ${s.Health}`;
+
+  left.appendChild(title);
+  left.appendChild(sub);
+
+  const btn = document.createElement("button");
+  btn.className = "btn danger";
+  btn.textContent = "REMOVER";
+  btn.addEventListener("click", ()=>{
+    state.firstMate = null;
+    save();
+    $("firstMateSection").style.display = "";
+    renderAll();
+  });
+
+  head.appendChild(left);
+  head.appendChild(btn);
+
+  const pows = document.createElement("div");
+  pows.className = "item-powers";
+  pows.innerHTML = `<b>Powers:</b> ${state.firstMate.powers.map(p=>`${p.name} (${p.activation})`).join(", ")}`;
+
+  const gear = document.createElement("div");
+  gear.className = "item-gear";
+  gear.innerHTML = `<b>Equip:</b> ${state.firstMate.gear ? state.firstMate.gear : "<span class='muted'>[vazio]</span>"}`;
+
+  card.appendChild(head);
+  card.appendChild(pows);
+  card.appendChild(gear);
+  body.appendChild(card);
 }
 
-function addFirstMate() {
-  if (firstMateInSquad) return;
-  firstMateInSquad = true;
-  $("btnAddFirstMate").disabled = true;
-  setSlotContent("firstMateSlot", "FIRST MATE", "Adicionado ao Squad", removeFirstMate);
-  updateDisplay();
-  saveGame();
-}
+function renderSoldierSlots(){
+  for(let i=1;i<=8;i++){
+    const slot = $(`slot${i}`);
+    const body = slot.querySelector(".slot-body");
+    body.innerHTML = "";
 
-function removeFirstMate() {
-  firstMateInSquad = false;
-  $("btnAddFirstMate").disabled = false;
-  setSlotContent("firstMateSlot", "FIRST MATE", "First Mate obrigatório", null);
-  updateDisplay();
-  saveGame();
-}
+    const soldier = state.soldiers[i-1];
+    if(!soldier) continue;
 
-function addSoldier(unit) {
-  if (recruited.length >= 8) return alert("Limite de 8 Soldiers atingido.");
-  if (credits < unit.cost) return alert("Créditos insuficientes.");
+    const card = document.createElement("div");
+    card.className = "squad-card-item";
 
-  credits -= unit.cost;
-  const id = crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random());
-  recruited.push({ id, name: unit.name, cost: unit.cost });
-  updateDisplay();
-  saveGame();
-}
+    const head = document.createElement("div");
+    head.className = "item-head";
 
-function removeSoldierById(id) {
-  const idx = recruited.findIndex((s) => s.id === id);
-  if (idx === -1) return;
-  const [r] = recruited.splice(idx, 1);
-  credits += r.cost;
-  updateDisplay();
-  saveGame();
-}
+    const left = document.createElement("div");
+    const title = document.createElement("div");
+    title.className = "item-title";
+    title.textContent = `${soldier.name}`;
 
-function updateDisplay() {
-  $("credits").textContent = String(credits);
-  $("soldierCount").textContent = String(recruited.length);
+    const sub = document.createElement("div");
+    sub.className = "item-sub";
+    sub.textContent = `Custo: ${soldier.cost}cr`;
 
-  const total = (captainInSquad ? 1 : 0) + (firstMateInSquad ? 1 : 0) + recruited.length;
-  $("squadCount").textContent = String(total);
+    left.appendChild(title);
+    left.appendChild(sub);
 
-  for (let i = 0; i < 8; i++) {
-    const slotId = `soldierSlot_${i}`;
-    const s = recruited[i];
-    if (!s) setSlotContent(slotId, `SOLDIER ${i + 1}`, "Vazio", null);
-    else setSlotContent(slotId, s.name, `${s.cost}cr`, () => removeSoldierById(s.id), "REMOVER");
+    const btn = document.createElement("button");
+    btn.className = "btn danger";
+    btn.textContent = "REMOVER";
+    btn.addEventListener("click", ()=>{
+      state.soldiers.splice(i-1, 1);
+      setCredits(state.credits + soldier.cost);
+      save();
+      renderAll();
+    });
+
+    head.appendChild(left);
+    head.appendChild(btn);
+
+    card.appendChild(head);
+    body.appendChild(card);
   }
 }
 
-function resetAll() {
-  credits = STARTING_CREDITS;
-  captainInSquad = false;
-  firstMateInSquad = false;
-  recruited = [];
-  captainBuild = { name: "", background: "Biomorph", picks: [] };
+function renderAll(){
+  $("credits").textContent = String(state.credits);
+  renderSoldierCount();
+
+  $("captainSection").style.display = state.captain ? "none" : "";
+  $("firstMateSection").style.display = state.firstMate ? "none" : "";
+
+  renderCaptainSlot();
+  renderFirstMateSlot();
+  renderSoldierSlots();
+
+  updateAddButtons();
+}
+
+/* ===== Reset ===== */
+function resetAll(){
+  if(!confirm("Resetar tudo? Isso limpa Captain, First Mate, Soldiers e créditos.")) return;
+
+  state = { credits: BASE_CREDITS, soldiers: [], captain: null, firstMate: null };
+  captainChosen = { choose1: null, choose2: [] };
+  firstMateChosen = { choose1: null, choose2: [] };
+  captainSelectedPowers = [];
+  firstMateSelectedPowers = [];
+
   localStorage.removeItem(STORAGE_KEY);
 
   $("captainName").value = "";
-  renderBackgroundDropdown();
-  renderBackgroundDetails();
+  $("captainGear").value = "";
+  $("captainPowerSearch").value = "";
 
-  $("baseM").textContent = String(CAPTAIN_BASE_STATS.M);
-  $("baseF").textContent = statFmt("F", CAPTAIN_BASE_STATS.F);
-  $("baseS").textContent = statFmt("S", CAPTAIN_BASE_STATS.S);
-  $("baseA").textContent = String(CAPTAIN_BASE_STATS.A);
-  $("baseW").textContent = statFmt("W", CAPTAIN_BASE_STATS.W);
-  $("baseH").textContent = String(CAPTAIN_BASE_STATS.H);
+  $("firstMateName").value = "";
+  $("firstMateGear").value = "";
+  $("firstMatePowerSearch").value = "";
 
-  updateCaptainStatsUI();
+  $("captainSection").style.display = "";
+  $("firstMateSection").style.display = "";
 
-  $("btnAddCaptain").disabled = false;
-  $("btnAddFirstMate").disabled = false;
-
-  setSlotContent("captainSlot", "CAPTAIN", "Captain obrigatório", null);
-  setSlotContent("firstMateSlot", "FIRST MATE", "First Mate obrigatório", null);
-
-  updateDisplay();
+  renderCaptainAll();
+  renderFirstMateAll();
+  renderAll();
 }
 
-function init() {
-  $("baseM").textContent = String(CAPTAIN_BASE_STATS.M);
-  $("baseF").textContent = statFmt("F", CAPTAIN_BASE_STATS.F);
-  $("baseS").textContent = statFmt("S", CAPTAIN_BASE_STATS.S);
-  $("baseA").textContent = String(CAPTAIN_BASE_STATS.A);
-  $("baseW").textContent = statFmt("W", CAPTAIN_BASE_STATS.W);
-  $("baseH").textContent = String(CAPTAIN_BASE_STATS.H);
+function init(){
+  load();
 
-  loadGame();
+  $("resetBtn").addEventListener("click", resetAll);
 
-  buildSquadSlots();
+  initCaptain();
+  initFirstMate();
   renderSoldierCatalog();
-  renderBackgroundDropdown();
 
-  $("captainBackground").addEventListener("change", (e) => {
-    captainBuild.background = e.target.value;
-    captainBuild.picks = [];
-    renderBackgroundDetails();
-    updateCaptainStatsUI();
-    saveGame();
-  });
-
-  $("captainName").value = captainBuild.name || "";
-  $("captainName").addEventListener("input", (e) => {
-    captainBuild.name = e.target.value;
-    if (captainInSquad) {
-      captainInSquad = false;
-      $("btnAddCaptain").disabled = false;
-      addCaptain();
-    }
-    saveGame();
-  });
-
-  renderBackgroundDetails();
-  updateCaptainStatsUI();
-
-  $("btnAddCaptain").onclick = addCaptain;
-  $("btnAddFirstMate").onclick = addFirstMate;
-  $("btnReset").onclick = resetAll;
-
-  if (!captainInSquad) {
-    setSlotContent("captainSlot", "CAPTAIN", "Captain obrigatório", null);
-    $("btnAddCaptain").disabled = false;
-  } else {
-    $("btnAddCaptain").disabled = true;
-    const was = captainInSquad;
-    captainInSquad = false;
-    $("btnAddCaptain").disabled = false;
-    addCaptain();
-    captainInSquad = was;
-    $("btnAddCaptain").disabled = true;
-  }
-
-  if (!firstMateInSquad) {
-    setSlotContent("firstMateSlot", "FIRST MATE", "First Mate obrigatório", null);
-    $("btnAddFirstMate").disabled = false;
-  } else {
-    $("btnAddFirstMate").disabled = true;
-    setSlotContent("firstMateSlot", "FIRST MATE", "Adicionado ao Squad", removeFirstMate);
-  }
-
-  updateDisplay();
+  renderAll();
 }
 
 init();

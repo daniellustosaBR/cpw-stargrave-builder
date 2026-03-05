@@ -1,173 +1,230 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>🚀 CPW STARGRAVE BUILDER 🚀</title>
-    <link rel="stylesheet" href="./style.css" />
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🚀 CPW STARGRAVE BUILDER 🚀</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
 
-  <body>
-    <div class="app">
-      <header class="app-header">
-        <h1 class="title">🚀 CPW STARGRAVE BUILDER 🚀</h1>
-      </header>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <h1 class="title">🚀 CPW STARGRAVE BUILDER 🚀</h1>
+    </header>
 
-      <main class="grid">
-        <!-- ESQUERDA -->
-        <section class="panel left">
-          <!-- CRÉDITOS -->
-          <div class="card credits-card">
-            <div class="credits-row">
-              <div class="credits-label">Créditos</div>
-              <div class="credits-value"><span id="credits">400</span>cr</div>
+    <main class="grid">
+      <!-- COLUNA ESQUERDA -->
+      <section class="panel left">
+        <!-- CRÉDITOS -->
+        <div class="card credits-card">
+          <div class="credits-row">
+            <div class="credits-label">Créditos</div>
+            <div class="credits-value"><span id="credits">400</span>cr</div>
+          </div>
+          <div class="credits-sub">
+            <span class="muted">Warband</span>
+          </div>
+        </div>
+
+        <!-- CAPTAIN -->
+        <div id="captainSection" class="card">
+          <div class="card-head">
+            <h2 class="card-title">Captain</h2>
+            <button id="addCaptainBtn" class="btn primary" disabled>ADICIONAR</button>
+          </div>
+
+          <div class="form-row">
+            <label class="label">Nome</label>
+            <input id="captainName" class="input" type="text" placeholder="Ex.: Zara Vex" />
+          </div>
+
+          <div class="form-row">
+            <label class="label">Background</label>
+            <select id="captainBackground" class="select"></select>
+          </div>
+
+          <!-- STAT MODS (dinâmico) -->
+          <div class="mini-card">
+            <div class="mini-title">Stat Modifications</div>
+            <div id="captainStatChoices" class="choices"></div>
+          </div>
+
+          <div class="subgrid">
+            <div class="mini-card">
+              <div class="mini-title">Stat-line base</div>
+              <div id="captainBaseStats" class="stats-grid"></div>
+            </div>
+
+            <div class="mini-card highlight">
+              <div class="mini-title">Stat-line final</div>
+              <div id="captainFinalStats" class="stats-grid"></div>
             </div>
           </div>
 
-          <!-- CAPTAIN — BACKGROUND -->
-          <div class="card">
-            <div class="card-header">
-              <h2 class="card-title">Captain — Background</h2>
-              <span class="pill">Passo 1</span>
+          <div class="mini-card">
+            <div class="mini-title">Powers (5)</div>
+            <div class="muted small">
+              Selecione 5. Você deve escolher <b>3 ou 4</b> core powers do background; o restante deve ser <b>não-core</b>.
             </div>
 
-            <div class="form-row">
-              <label for="captainName" class="label">Nome do Captain (opcional)</label>
-              <input id="captainName" class="input" type="text" placeholder="Ex: Captain Vex" />
-            </div>
-
-            <div class="form-row">
-              <label for="captainBackground" class="label">Escolha o Background</label>
-              <select id="captainBackground" class="select"></select>
-            </div>
-
-            <div id="bgDetails" class="bg-details"></div>
-
-            <!-- STAT CARDS: 2 colunas x 3 linhas -->
-            <div class="subgrid">
-              <div class="stat-card">
-                <div class="mini-title">Stat-line base</div>
-
-                <div class="stats-grid">
-                  <div class="stat-item">
-                    <div class="stat-name">Move</div>
-                    <div class="stat-value" id="baseM">6</div>
-                  </div>
-                  <div class="stat-item">
-                    <div class="stat-name">Armour</div>
-                    <div class="stat-value" id="baseA">9</div>
-                  </div>
-                  <div class="stat-item">
-                    <div class="stat-name">Fight</div>
-                    <div class="stat-value" id="baseF">+3</div>
-                  </div>
-                  <div class="stat-item">
-                    <div class="stat-name">Will</div>
-                    <div class="stat-value" id="baseW">+3</div>
-                  </div>
-                  <div class="stat-item">
-                    <div class="stat-name">Shoot</div>
-                    <div class="stat-value" id="baseS">+2</div>
-                  </div>
-                  <div class="stat-item">
-                    <div class="stat-name">Health</div>
-                    <div class="stat-value" id="baseH">16</div>
-                  </div>
-                </div>
+            <div class="power-tools">
+              <div class="chip">
+                Core necessários:
+                <select id="captainCoreCount" class="select chip-select">
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
               </div>
+              <input id="captainPowerSearch" class="input" type="text" placeholder="Buscar power..." />
+            </div>
 
-              <div class="stat-card stat-card-final">
-                <div class="mini-title">Stat-line final (com mods)</div>
-
-                <div class="stats-grid">
-                  <div class="stat-item">
-                    <div class="stat-name">Move</div>
-                    <div class="stat-value" id="finalM">6</div>
-                  </div>
-                  <div class="stat-item">
-                    <div class="stat-name">Armour</div>
-                    <div class="stat-value" id="finalA">9</div>
-                  </div>
-                  <div class="stat-item">
-                    <div class="stat-name">Fight</div>
-                    <div class="stat-value" id="finalF">+3</div>
-                  </div>
-                  <div class="stat-item">
-                    <div class="stat-name">Will</div>
-                    <div class="stat-value" id="finalW">+3</div>
-                  </div>
-                  <div class="stat-item">
-                    <div class="stat-name">Shoot</div>
-                    <div class="stat-value" id="finalS">+2</div>
-                  </div>
-                  <div class="stat-item">
-                    <div class="stat-name">Health</div>
-                    <div class="stat-value" id="finalH">16</div>
-                  </div>
-                </div>
+            <div class="power-columns">
+              <div>
+                <div class="mini-title small-title">POWERS LIST</div>
+                <div id="captainPowerList" class="power-list"></div>
+              </div>
+              <div>
+                <div class="mini-title small-title">SELECIONADOS</div>
+                <div id="captainSelectedPowers" class="selected-list"></div>
               </div>
             </div>
+          </div>
 
-            <div class="hint">
-              Nota: um Captain escolhe <b>5 powers</b>. Você escolhe <b>3 ou 4</b> dos
-              <b>Core Powers</b> do background e o restante pode vir de qualquer power.
+          <div class="mini-card">
+            <div class="mini-title">Equipamentos</div>
+            <div class="muted small">Espaço reservado (vamos implementar depois).</div>
+            <textarea id="captainGear" class="textarea" rows="3" placeholder="Ex.: pistol, knife, medkit..."></textarea>
+          </div>
+        </div>
+
+        <!-- FIRST MATE -->
+        <div id="firstMateSection" class="card">
+          <div class="card-head">
+            <h2 class="card-title">First Mate</h2>
+            <button id="addFirstMateBtn" class="btn primary" disabled>ADICIONAR</button>
+          </div>
+
+          <div class="form-row">
+            <label class="label">Nome</label>
+            <input id="firstMateName" class="input" type="text" placeholder="Ex.: K-17 Echo" />
+          </div>
+
+          <div class="form-row">
+            <label class="label">Background</label>
+            <select id="firstMateBackground" class="select"></select>
+          </div>
+
+          <!-- STAT MODS (dinâmico) -->
+          <div class="mini-card">
+            <div class="mini-title">Stat Modifications</div>
+            <div id="firstMateStatChoices" class="choices"></div>
+          </div>
+
+          <div class="subgrid">
+            <div class="mini-card">
+              <div class="mini-title">Stat-line base</div>
+              <div id="firstMateBaseStats" class="stats-grid"></div>
+            </div>
+
+            <div class="mini-card highlight">
+              <div class="mini-title">Stat-line final</div>
+              <div id="firstMateFinalStats" class="stats-grid"></div>
             </div>
           </div>
 
-          <!-- CAPTAIN -->
-          <div class="card">
-            <div class="card-header tight">
-              <h2 class="card-title">Captain</h2>
-              <button id="btnAddCaptain" class="btn btn-primary">ADICIONAR</button>
-            </div>
-            <div class="muted small">Ao adicionar, o Captain vai para o Squad (slot destacado).</div>
-          </div>
-
-          <!-- FIRST MATE -->
-          <div class="card">
-            <div class="card-header tight">
-              <h2 class="card-title">First Mate</h2>
-              <button id="btnAddFirstMate" class="btn btn-primary">ADICIONAR</button>
-            </div>
-            <div class="muted small">Ao adicionar, o First Mate vai para o Squad (slot destacado).</div>
-          </div>
-
-          <!-- SOLDIERS -->
-          <div class="card">
-            <div class="card-header tight">
-              <h2 class="card-title">
-                Soldiers <span class="muted">·</span>
-                <span class="mono"><span id="soldierCount">0</span> / 8</span>
-              </h2>
+          <div class="mini-card">
+            <div class="mini-title">Powers (4)</div>
+            <div class="muted small">
+              Selecione 4. Você deve escolher <b>2 ou 3</b> core powers do background; o restante deve ser <b>não-core</b>.
+              <br/>
+              <span class="muted">
+                Activation do First Mate: <b>+2</b> se core, <b>+4</b> se não-core.
+              </span>
             </div>
 
-            <div id="soldierCatalog" class="catalog"></div>
-          </div>
-        </section>
-
-        <!-- DIREITA -->
-        <aside class="panel right">
-          <div class="card squad-card">
-            <div class="card-header">
-              <h2 class="card-title">Squad</h2>
-              <span class="pill mono"><span id="squadCount">0</span> / 10</span>
+            <div class="power-tools">
+              <div class="chip">
+                Core necessários:
+                <select id="firstMateCoreCount" class="select chip-select">
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                </select>
+              </div>
+              <input id="firstMatePowerSearch" class="input" type="text" placeholder="Buscar power..." />
             </div>
 
-            <div class="squad-grid" id="squadGrid"></div>
-
-            <div class="hint">
-              Regras atuais no builder: <b>1 Captain</b> + <b>1 First Mate</b> + até <b>8 Soldiers</b>.
+            <div class="power-columns">
+              <div>
+                <div class="mini-title small-title">POWERS LIST</div>
+                <div id="firstMatePowerList" class="power-list"></div>
+              </div>
+              <div>
+                <div class="mini-title small-title">SELECIONADOS</div>
+                <div id="firstMateSelectedPowers" class="selected-list"></div>
+              </div>
             </div>
           </div>
-        </aside>
-      </main>
 
-      <footer class="footer">
-        <span class="muted small">CPW Stargrave Builder — versão local (HTML/CSS/JS)</span>
-        <button id="btnReset" class="btn btn-ghost">RESET</button>
-      </footer>
-    </div>
+          <div class="mini-card">
+            <div class="mini-title">Equipamentos</div>
+            <div class="muted small">Espaço reservado (vamos implementar depois).</div>
+            <textarea id="firstMateGear" class="textarea" rows="3" placeholder="Ex.: carbine, frag grenades..."></textarea>
+          </div>
+        </div>
 
-    <script src="./script.js"></script>
-  </body>
+        <!-- SOLDIERS -->
+        <div class="card">
+          <div class="card-head">
+            <h2 class="card-title">
+              Soldiers
+              <span class="pill">Total: <span id="soldierCount">0</span> / 8</span>
+            </h2>
+          </div>
+
+          <div id="soldierCatalog" class="catalog"></div>
+        </div>
+      </section>
+
+      <!-- COLUNA DIREITA: SQUAD -->
+      <aside class="panel right">
+        <div class="card squad-card">
+          <div class="card-head">
+            <h2 class="card-title">Squad</h2>
+            <button id="resetBtn" class="btn ghost">RESET</button>
+          </div>
+
+          <div class="slots">
+            <div class="slot required" id="slotCaptain">
+              <div class="slot-title">CAPTAIN</div>
+              <div class="slot-hint">Captain obrigatório</div>
+              <div class="slot-body" id="captainSlotBody"></div>
+            </div>
+
+            <div class="slot required" id="slotFirstMate">
+              <div class="slot-title">FIRST MATE</div>
+              <div class="slot-hint">First Mate obrigatório</div>
+              <div class="slot-body" id="firstMateSlotBody"></div>
+            </div>
+
+            <div class="slot" id="slot1"><div class="slot-title">SLOT 1</div><div class="slot-body"></div></div>
+            <div class="slot" id="slot2"><div class="slot-title">SLOT 2</div><div class="slot-body"></div></div>
+            <div class="slot" id="slot3"><div class="slot-title">SLOT 3</div><div class="slot-body"></div></div>
+            <div class="slot" id="slot4"><div class="slot-title">SLOT 4</div><div class="slot-body"></div></div>
+            <div class="slot" id="slot5"><div class="slot-title">SLOT 5</div><div class="slot-body"></div></div>
+            <div class="slot" id="slot6"><div class="slot-title">SLOT 6</div><div class="slot-body"></div></div>
+            <div class="slot" id="slot7"><div class="slot-title">SLOT 7</div><div class="slot-body"></div></div>
+            <div class="slot" id="slot8"><div class="slot-title">SLOT 8</div><div class="slot-body"></div></div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <span class="muted small">CPW Builder • localStorage ativado</span>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
 </html>
