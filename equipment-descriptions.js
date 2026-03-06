@@ -38,6 +38,6 @@ Heavier armour offering better protection.
 `,
 
   "Combat Armour": `
-Advanced armour. A figure may not use certain powers or effects with conflicting armour restrictions.
+Advanced armour. Some powers and effects may have armour restrictions.
 `
 };

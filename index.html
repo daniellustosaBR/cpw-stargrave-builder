@@ -6,7 +6,6 @@
   <title>🚀 CPW STARGRAVE BUILDER 🚀</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
   <div class="app">
     <header class="topbar">
@@ -52,13 +51,13 @@
               <div class="mini-title">Stat-line base</div>
               <div id="captainBaseStats" class="stats-grid"></div>
             </div>
-
             <div class="mini-card highlight">
               <div class="mini-title">Stat-line final</div>
               <div id="captainFinalStats" class="stats-grid"></div>
             </div>
           </div>
 
+          <!-- POWERS CAPTAIN -->
           <div class="mini-card">
             <div class="mini-title">Powers (5)</div>
             <div class="muted small">
@@ -84,6 +83,23 @@
               <div>
                 <div class="mini-title small-title">SELECIONADOS</div>
                 <div id="captainSelectedPowers" class="selected-list"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- EQUIPMENT CAPTAIN -->
+          <div class="mini-card">
+            <div class="mini-title">Equipment</div>
+
+            <div class="equipment-columns">
+              <div>
+                <div class="mini-title small-title">EQUIPMENT LIST</div>
+                <div id="captainEquipmentListAll" class="power-list"></div>
+              </div>
+
+              <div>
+                <div class="mini-title small-title">SELECIONADOS</div>
+                <div id="captainSelectedEquipment" class="selected-list equipment-selected"></div>
               </div>
             </div>
           </div>
@@ -116,21 +132,19 @@
               <div class="mini-title">Stat-line base</div>
               <div id="firstMateBaseStats" class="stats-grid"></div>
             </div>
-
             <div class="mini-card highlight">
               <div class="mini-title">Stat-line final</div>
               <div id="firstMateFinalStats" class="stats-grid"></div>
             </div>
           </div>
 
+          <!-- POWERS FIRST MATE -->
           <div class="mini-card">
             <div class="mini-title">Powers (4)</div>
             <div class="muted small">
               Selecione 4. Você deve escolher <b>2 ou 3</b> core powers do background; o restante deve ser <b>não-core</b>.
-              <br/>
-              <span class="muted">
-                Activation do First Mate: <b>+2</b> se core, <b>+4</b> se não-core.
-              </span>
+              <br />
+              <span class="muted">Activation do First Mate: <b>+2</b> se core, <b>+4</b> se não-core.</span>
             </div>
 
             <div class="power-tools">
@@ -155,42 +169,21 @@
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- EQUIPMENT -->
-        <div class="card">
-          <div class="card-head">
-            <h2 class="card-title">Equipment</h2>
-          </div>
+          <!-- EQUIPMENT FIRST MATE -->
+          <div class="mini-card">
+            <div class="mini-title">Equipment</div>
 
-          <div class="equipment-targets">
-            <span class="muted small">Destino:</span>
-            <button id="equipmentTargetCaptain" class="btn target-btn active">Captain</button>
-            <button id="equipmentTargetFirstMate" class="btn target-btn">First Mate</button>
-            <button id="equipmentTargetExtra" class="btn target-btn">Extra</button>
-          </div>
-
-          <div class="equipment-layout">
-            <div class="equipment-lists">
-              <div class="equipment-group">
-                <div class="mini-title small-title">EQUIPMENT</div>
-                <div id="equipmentListEquipment" class="power-list"></div>
+            <div class="equipment-columns">
+              <div>
+                <div class="mini-title small-title">EQUIPMENT LIST</div>
+                <div id="firstMateEquipmentListAll" class="power-list"></div>
               </div>
 
-              <div class="equipment-group">
-                <div class="mini-title small-title">WEAPONS</div>
-                <div id="equipmentListWeapons" class="power-list"></div>
+              <div>
+                <div class="mini-title small-title">SELECIONADOS</div>
+                <div id="firstMateSelectedEquipment" class="selected-list equipment-selected"></div>
               </div>
-
-              <div class="equipment-group">
-                <div class="mini-title small-title">ARMOUR</div>
-                <div id="equipmentListArmour" class="power-list"></div>
-              </div>
-            </div>
-
-            <div class="equipment-slots-wrapper">
-              <div class="mini-title small-title">SLOTS</div>
-              <div id="equipmentSlots" class="equipment-slot-grid"></div>
             </div>
           </div>
         </div>
@@ -208,6 +201,7 @@
         </div>
       </section>
 
+      <!-- SQUAD -->
       <aside class="panel right">
         <div class="card squad-card">
           <div class="card-head">

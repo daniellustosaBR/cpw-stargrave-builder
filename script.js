@@ -1,4 +1,4 @@
-const STORAGE_KEY = "cpw_stargrave_builder_v7";
+const STORAGE_KEY = "cpw_stargrave_builder_v9";
 
 const BASE_CREDITS = 400;
 const MAX_SOLDIERS = 8;
@@ -96,16 +96,14 @@ let state = {
   soldiers: [],
   captain: null,
   firstMate: null,
-  captainGearSlots: [null, null, null, null, null, null],
-  firstMateGearSlots: [null, null, null, null, null],
-  extraGearSlots: [null, null, null, null]
+  captainEquipment: [],
+  firstMateEquipment: []
 };
 
 let captainChosen = { choose1: null, choose2: [] };
 let firstMateChosen = { choose1: null, choose2: [] };
 let captainSelectedPowers = [];
 let firstMateSelectedPowers = [];
-let equipmentTarget = "captain";
 
 function $(id){ return document.getElementById(id); }
 function deepCopy(obj){ return JSON.parse(JSON.stringify(obj)); }
@@ -126,15 +124,13 @@ function powerBaseInfo(powerName){
 }
 
 function save(){
-  const payload = {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
     state,
     captainChosen,
     firstMateChosen,
     captainSelectedPowers,
-    firstMateSelectedPowers,
-    equipmentTarget
-  };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    firstMateSelectedPowers
+  }));
 }
 
 function load(){
@@ -148,7 +144,6 @@ function load(){
     if(data.firstMateChosen) firstMateChosen = data.firstMateChosen;
     if(Array.isArray(data.captainSelectedPowers)) captainSelectedPowers = data.captainSelectedPowers;
     if(Array.isArray(data.firstMateSelectedPowers)) firstMateSelectedPowers = data.firstMateSelectedPowers;
-    if(data.equipmentTarget) equipmentTarget = data.equipmentTarget;
   }catch(e){
     console.warn("Falha ao carregar storage:", e);
   }
@@ -166,9 +161,7 @@ function renderSoldierCount(){
 
 function statsToGrid(container, stats){
   container.innerHTML = "";
-  const order = ["Move","Fight","Shoot","Armour","Will","Health"];
-
-  order.forEach(k => {
+  ["Move","Fight","Shoot","Armour","Will","Health"].forEach(k=>{
     const div = document.createElement("div");
     div.className = "stat";
 
@@ -201,13 +194,8 @@ function computeFinalStats(baseStats, bgName, chosen){
   if(sm.Will) out.Will += sm.Will;
   if(sm.Health) out.Health += sm.Health;
 
-  if(sm.choose1 && chosen.choose1){
-    out[chosen.choose1] += 1;
-  }
-
-  if(sm.choose2 && Array.isArray(chosen.choose2)){
-    chosen.choose2.forEach(k => { out[k] += 1; });
-  }
+  if(sm.choose1 && chosen.choose1) out[chosen.choose1] += 1;
+  if(sm.choose2 && Array.isArray(chosen.choose2)) chosen.choose2.forEach(k => { out[k] += 1; });
 
   return out;
 }
@@ -234,7 +222,6 @@ function equipmentDescription(name){
   return dict[name] || "Descrição não cadastrada ainda.";
 }
 
-/* TOOLTIP */
 function tooltipEl(){ return $("globalTooltip"); }
 
 function showTooltip(html, x, y){
@@ -272,13 +259,14 @@ function makeHelpIcon(title, description, footerText){
   help.className = "help";
   help.textContent = "?";
 
-  let html = '<div style="font-weight:900; margin-bottom:6px;">' + title + '</div>' +
-             '<div style="opacity:.88; margin-bottom:8px; white-space:pre-wrap;">' + description + '</div>';
+  let html =
+    '<div style="font-weight:900; margin-bottom:6px;">' + title + '</div>' +
+    '<div style="opacity:.88; margin-bottom:8px; white-space:pre-wrap;">' + description + '</div>';
 
   if(footerText){
     html += '<div style="opacity:.7; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \'Liberation Mono\', \'Courier New\', monospace;">' +
-            footerText +
-            '</div>';
+      footerText +
+      '</div>';
   }
 
   help.addEventListener("mouseenter", (e)=> showTooltip(html, e.clientX, e.clientY));
@@ -298,10 +286,9 @@ function makeEquipmentHelpIcon(itemName){
   return makeHelpIcon(itemName, equipmentDescription(itemName), "");
 }
 
-/* BACKGROUND UI */
 function renderBackgroundOptions(selectEl){
   selectEl.innerHTML = "";
-  backgrounds.forEach(bg => {
+  backgrounds.forEach(bg=>{
     const opt = document.createElement("option");
     opt.value = bg.name;
     opt.textContent = bg.name;
@@ -309,7 +296,6 @@ function renderBackgroundOptions(selectEl){
   });
 }
 
-/* STAT CHOICES */
 function renderStatChoices(targetId, bgName, chosen, onChange){
   const bg = getBackground(bgName);
   const container = $(targetId);
@@ -331,7 +317,7 @@ function renderStatChoices(targetId, bgName, chosen, onChange){
     const row = document.createElement("div");
     row.className = "choice-row";
 
-    fixedKeys.forEach(k => {
+    fixedKeys.forEach(k=>{
       const pill = document.createElement("div");
       pill.className = "pill-option";
       pill.innerHTML = '<span>' + k + ' ' + (sm[k] >= 0 ? '+' + sm[k] : sm[k]) + '</span>';
@@ -350,7 +336,7 @@ function renderStatChoices(targetId, bgName, chosen, onChange){
     const row = document.createElement("div");
     row.className = "choice-row";
 
-    sm.choose1.forEach(opt => {
+    sm.choose1.forEach(opt=>{
       const label = document.createElement("label");
       label.className = "pill-option";
 
@@ -381,7 +367,7 @@ function renderStatChoices(targetId, bgName, chosen, onChange){
     const row = document.createElement("div");
     row.className = "choice-row";
 
-    sm.choose2.forEach(opt => {
+    sm.choose2.forEach(opt=>{
       const label = document.createElement("label");
       label.className = "pill-option";
 
@@ -417,16 +403,13 @@ function renderStatChoices(targetId, bgName, chosen, onChange){
   }
 }
 
-/* SORTED POWERS */
 function sortedPowersForBackground(bgName, search, selectedArray){
   const q = normalizeName(search);
   const selectedSet = {};
-  selectedArray.forEach(p => {
-    selectedSet[normalizeName(p)] = true;
-  });
+  selectedArray.forEach(p => { selectedSet[normalizeName(p)] = true; });
 
   const filtered = [];
-  powers.forEach(p => {
+  powers.forEach(p=>{
     const pn = normalizeName(p.name);
     if(selectedSet[pn]) return;
     if(q && pn.indexOf(q) === -1) return;
@@ -446,6 +429,167 @@ function sortedPowersForBackground(bgName, search, selectedArray){
   });
 
   return filtered;
+}
+
+/* EQUIPMENT */
+function equipmentCategory(name){
+  if((equipmentData.armour || []).some(x => x.name === name)) return "armour";
+  if((equipmentData.weapons || []).some(x => x.name === name)) return "weapon";
+  return "equipment";
+}
+
+function equipmentBadgeClass(type){
+  if(type === "armour") return "badge-armour";
+  if(type === "weapon") return "badge-weapon";
+  return "badge-equipment";
+}
+
+function equipmentBadgeText(type){
+  if(type === "armour") return "ARMOUR";
+  if(type === "weapon") return "WEAPON";
+  return "EQUIPMENT";
+}
+
+function allEquipmentMerged(){
+  return [
+    ...(equipmentData.equipment || []).map(x => ({ name: x.name, type: "equipment" })),
+    ...(equipmentData.weapons || []).map(x => ({ name: x.name, type: "weapon" })),
+    ...(equipmentData.armour || []).map(x => ({ name: x.name, type: "armour" }))
+  ].sort((a,b)=> a.name.localeCompare(b.name));
+}
+
+function hasArmour(equipmentArray){
+  return equipmentArray.some(x => x && equipmentCategory(x.name) === "armour");
+}
+
+function renderEquipmentList(targetId, owner){
+  const el = $(targetId);
+  el.innerHTML = "";
+
+  const selected = owner === "captain" ? state.captainEquipment : state.firstMateEquipment;
+  const selectedNames = selected.map(x => x.name);
+
+  allEquipmentMerged().forEach(item=>{
+    if(selectedNames.includes(item.name)) return;
+
+    const row = document.createElement("div");
+    row.className = "power-item";
+
+    const left = document.createElement("div");
+    left.className = "power-left";
+
+    left.appendChild(makeEquipmentHelpIcon(item.name));
+
+    const name = document.createElement("div");
+    name.className = "power-name";
+    name.textContent = item.name;
+
+    const badge = document.createElement("span");
+    badge.className = "badge-item " + equipmentBadgeClass(item.type);
+    badge.textContent = equipmentBadgeText(item.type);
+    name.appendChild(badge);
+
+    left.appendChild(name);
+
+    const btn = document.createElement("button");
+    btn.className = "btn power-add";
+    btn.textContent = "ADICIONAR";
+    btn.addEventListener("click", ()=> addEquipmentToOwner(owner, item));
+
+    row.appendChild(left);
+    row.appendChild(btn);
+    el.appendChild(row);
+  });
+}
+
+function addEquipmentToOwner(owner, item){
+  if(owner === "captain"){
+    if(state.captainEquipment.length >= 6){
+      alert("Captain só pode ter 6 equipamentos.");
+      return;
+    }
+    if(item.type === "armour" && hasArmour(state.captainEquipment)){
+      alert("Captain já possui um armour.");
+      return;
+    }
+    state.captainEquipment.push({ name: item.name });
+  }
+
+  if(owner === "firstMate"){
+    if(state.firstMateEquipment.length >= 5){
+      alert("First Mate só pode ter 5 equipamentos.");
+      return;
+    }
+    if(item.type === "armour" && hasArmour(state.firstMateEquipment)){
+      alert("First Mate já possui um armour.");
+      return;
+    }
+    state.firstMateEquipment.push({ name: item.name });
+  }
+
+  save();
+  renderEquipmentAll();
+  renderAll();
+}
+
+function removeEquipmentFromOwner(owner, itemName){
+  if(owner === "captain"){
+    state.captainEquipment = state.captainEquipment.filter(x => x.name !== itemName);
+  }
+  if(owner === "firstMate"){
+    state.firstMateEquipment = state.firstMateEquipment.filter(x => x.name !== itemName);
+  }
+
+  save();
+  renderEquipmentAll();
+  renderAll();
+}
+
+function renderSelectedEquipment(owner, targetId){
+  const out = $(targetId);
+  out.innerHTML = "";
+
+  const selected = owner === "captain" ? state.captainEquipment : state.firstMateEquipment;
+
+  selected.forEach(item=>{
+    const type = equipmentCategory(item.name);
+
+    const row = document.createElement("div");
+    row.className = "power-item";
+
+    const left = document.createElement("div");
+    left.className = "power-left";
+
+    left.appendChild(makeEquipmentHelpIcon(item.name));
+
+    const name = document.createElement("div");
+    name.className = "power-name";
+    name.textContent = item.name;
+
+    const badge = document.createElement("span");
+    badge.className = "badge-item " + equipmentBadgeClass(type);
+    badge.textContent = equipmentBadgeText(type);
+    name.appendChild(badge);
+
+    left.appendChild(name);
+
+    const btn = document.createElement("button");
+    btn.className = "btn danger";
+    btn.textContent = "REMOVER";
+    btn.addEventListener("click", ()=> removeEquipmentFromOwner(owner, item.name));
+
+    row.appendChild(left);
+    row.appendChild(btn);
+    out.appendChild(row);
+  });
+}
+
+function renderEquipmentAll(){
+  renderEquipmentList("captainEquipmentListAll", "captain");
+  renderSelectedEquipment("captain", "captainSelectedEquipment");
+
+  renderEquipmentList("firstMateEquipmentListAll", "firstMate");
+  renderSelectedEquipment("firstMate", "firstMateSelectedEquipment");
 }
 
 /* VALIDATION */
@@ -469,6 +613,7 @@ function isCaptainReady(){
   const nameOk = normalizeName($("captainName").value).length > 0;
   const bgName = $("captainBackground").value;
   const statsOk = isStatSelectionComplete(bgName, captainChosen);
+
   const powersOk = captainSelectedPowers.length === 5;
   const coreNeed = parseInt($("captainCoreCount").value, 10);
   let coreCount = 0;
@@ -481,6 +626,7 @@ function isFirstMateReady(){
   const nameOk = normalizeName($("firstMateName").value).length > 0;
   const bgName = $("firstMateBackground").value;
   const statsOk = isStatSelectionComplete(bgName, firstMateChosen);
+
   const powersOk = firstMateSelectedPowers.length === 4;
   const coreNeed = parseInt($("firstMateCoreCount").value, 10);
   let coreCount = 0;
@@ -504,8 +650,7 @@ function renderCaptainAll(){
   });
 
   statsToGrid($("captainBaseStats"), captainBase);
-  const finalStats = computeFinalStats(captainBase, bgName, captainChosen);
-  statsToGrid($("captainFinalStats"), finalStats);
+  statsToGrid($("captainFinalStats"), computeFinalStats(captainBase, bgName, captainChosen));
 
   renderCaptainPowerList();
   renderCaptainSelectedList();
@@ -615,8 +760,7 @@ function renderFirstMateAll(){
   });
 
   statsToGrid($("firstMateBaseStats"), firstMateBase);
-  const finalStats = computeFinalStats(firstMateBase, bgName, firstMateChosen);
-  statsToGrid($("firstMateFinalStats"), finalStats);
+  statsToGrid($("firstMateFinalStats"), computeFinalStats(firstMateBase, bgName, firstMateChosen));
 
   renderFirstMatePowerList();
   renderFirstMateSelectedList();
@@ -776,260 +920,6 @@ function addFirstMateToSquad(){
   $("firstMateSection").style.display = "none";
 }
 
-/* EQUIPMENT */
-function setEquipmentTarget(target){
-  equipmentTarget = target;
-
-  $("equipmentTargetCaptain").classList.toggle("active", target === "captain");
-  $("equipmentTargetFirstMate").classList.toggle("active", target === "firstMate");
-  $("equipmentTargetExtra").classList.toggle("active", target === "extra");
-
-  save();
-}
-
-function allEquippedNames(){
-  const names = [];
-
-  state.captainGearSlots.forEach(x => { if(x) names.push(x.name); });
-  state.firstMateGearSlots.forEach(x => { if(x) names.push(x.name); });
-  state.extraGearSlots.forEach(x => { if(x) names.push(x.name); });
-
-  return names;
-}
-
-function equipmentCategory(name){
-  if((equipmentData.armour || []).some(x => x.name === name)) return "armour";
-  if((equipmentData.weapons || []).some(x => x.name === name)) return "weapons";
-  return "equipment";
-}
-
-function hasArmour(slots){
-  return slots.some(x => x && equipmentCategory(x.name) === "armour");
-}
-
-function addEquipmentToTarget(item){
-  if(equipmentTarget === "captain"){
-    if(equipmentCategory(item.name) === "armour" && hasArmour(state.captainGearSlots)){
-      alert("Captain já possui um armour.");
-      return;
-    }
-    const idx = state.captainGearSlots.findIndex(x => x === null);
-    if(idx === -1){
-      alert("Captain não tem slots livres.");
-      return;
-    }
-    state.captainGearSlots[idx] = { name: item.name };
-  }
-
-  if(equipmentTarget === "firstMate"){
-    if(equipmentCategory(item.name) === "armour" && hasArmour(state.firstMateGearSlots)){
-      alert("First Mate já possui um armour.");
-      return;
-    }
-    const idx = state.firstMateGearSlots.findIndex(x => x === null);
-    if(idx === -1){
-      alert("First Mate não tem slots livres.");
-      return;
-    }
-    state.firstMateGearSlots[idx] = { name: item.name };
-  }
-
-  if(equipmentTarget === "extra"){
-    const idx = state.extraGearSlots.findIndex(x => x === null);
-    if(idx === -1){
-      alert("Não há slots EXTRA livres.");
-      return;
-    }
-    state.extraGearSlots[idx] = { name: item.name };
-  }
-
-  save();
-  renderEquipmentAll();
-  renderAll();
-}
-
-function removeEquipmentFromSlot(owner, index){
-  if(owner === "captain") state.captainGearSlots[index] = null;
-  if(owner === "firstMate") state.firstMateGearSlots[index] = null;
-  if(owner === "extra") state.extraGearSlots[index] = null;
-
-  save();
-  renderEquipmentAll();
-  renderAll();
-}
-
-function renderEquipmentCategory(listElId, items){
-  const el = $(listElId);
-  el.innerHTML = "";
-
-  const equipped = allEquippedNames();
-
-  items.forEach(item => {
-    if(equipped.includes(item.name)) return;
-
-    const row = document.createElement("div");
-    row.className = "power-item";
-
-    const left = document.createElement("div");
-    left.className = "power-left";
-
-    left.appendChild(makeEquipmentHelpIcon(item.name));
-
-    const name = document.createElement("div");
-    name.className = "power-name";
-    name.textContent = item.name;
-
-    left.appendChild(name);
-
-    const btn = document.createElement("button");
-    btn.className = "btn power-add";
-    btn.textContent = "ADICIONAR";
-    btn.addEventListener("click", ()=>{
-      addEquipmentToTarget(item);
-    });
-
-    row.appendChild(left);
-    row.appendChild(btn);
-    el.appendChild(row);
-  });
-}
-
-function renderEquipmentSlots(){
-  const wrap = $("equipmentSlots");
-  wrap.innerHTML = "";
-
-  state.captainGearSlots.forEach((item, index) => {
-    const slot = document.createElement("div");
-    slot.className = "equipment-slot initial";
-
-    const label = document.createElement("div");
-    label.className = "equipment-slot-label";
-    label.textContent = "Captain Initial " + (index + 1);
-
-    slot.appendChild(label);
-
-    if(item){
-      const row = document.createElement("div");
-      row.className = "power-item";
-
-      const left = document.createElement("div");
-      left.className = "power-left";
-      left.appendChild(makeEquipmentHelpIcon(item.name));
-
-      const name = document.createElement("div");
-      name.className = "power-name";
-      name.textContent = item.name;
-      left.appendChild(name);
-
-      const btn = document.createElement("button");
-      btn.className = "btn danger";
-      btn.textContent = "REMOVER";
-      btn.addEventListener("click", ()=> removeEquipmentFromSlot("captain", index));
-
-      row.appendChild(left);
-      row.appendChild(btn);
-      slot.appendChild(row);
-    }else{
-      const empty = document.createElement("div");
-      empty.className = "muted small";
-      empty.textContent = "Vazio";
-      slot.appendChild(empty);
-    }
-
-    wrap.appendChild(slot);
-  });
-
-  state.firstMateGearSlots.forEach((item, index) => {
-    const slot = document.createElement("div");
-    slot.className = "equipment-slot initial";
-
-    const label = document.createElement("div");
-    label.className = "equipment-slot-label";
-    label.textContent = "First Mate Initial " + (index + 1);
-
-    slot.appendChild(label);
-
-    if(item){
-      const row = document.createElement("div");
-      row.className = "power-item";
-
-      const left = document.createElement("div");
-      left.className = "power-left";
-      left.appendChild(makeEquipmentHelpIcon(item.name));
-
-      const name = document.createElement("div");
-      name.className = "power-name";
-      name.textContent = item.name;
-      left.appendChild(name);
-
-      const btn = document.createElement("button");
-      btn.className = "btn danger";
-      btn.textContent = "REMOVER";
-      btn.addEventListener("click", ()=> removeEquipmentFromSlot("firstMate", index));
-
-      row.appendChild(left);
-      row.appendChild(btn);
-      slot.appendChild(row);
-    }else{
-      const empty = document.createElement("div");
-      empty.className = "muted small";
-      empty.textContent = "Vazio";
-      slot.appendChild(empty);
-    }
-
-    wrap.appendChild(slot);
-  });
-
-  state.extraGearSlots.forEach((item, index) => {
-    const slot = document.createElement("div");
-    slot.className = "equipment-slot extra";
-
-    const label = document.createElement("div");
-    label.className = "equipment-slot-label";
-    label.textContent = "Extra " + (index + 1);
-
-    slot.appendChild(label);
-
-    if(item){
-      const row = document.createElement("div");
-      row.className = "power-item";
-
-      const left = document.createElement("div");
-      left.className = "power-left";
-      left.appendChild(makeEquipmentHelpIcon(item.name));
-
-      const name = document.createElement("div");
-      name.className = "power-name";
-      name.textContent = item.name;
-      left.appendChild(name);
-
-      const btn = document.createElement("button");
-      btn.className = "btn danger";
-      btn.textContent = "REMOVER";
-      btn.addEventListener("click", ()=> removeEquipmentFromSlot("extra", index));
-
-      row.appendChild(left);
-      row.appendChild(btn);
-      slot.appendChild(row);
-    }else{
-      const empty = document.createElement("div");
-      empty.className = "muted small";
-      empty.textContent = "Vazio";
-      slot.appendChild(empty);
-    }
-
-    wrap.appendChild(slot);
-  });
-}
-
-function renderEquipmentAll(){
-  renderEquipmentCategory("equipmentListEquipment", equipmentData.equipment || []);
-  renderEquipmentCategory("equipmentListWeapons", equipmentData.weapons || []);
-  renderEquipmentCategory("equipmentListArmour", equipmentData.armour || []);
-  renderEquipmentSlots();
-  setEquipmentTarget(equipmentTarget);
-}
-
 /* SOLDIERS */
 function renderSoldierCatalog(){
   const wrap = $("soldierCatalog");
@@ -1040,6 +930,7 @@ function renderSoldierCatalog(){
     row.className = "unit-row";
 
     const left = document.createElement("div");
+
     const name = document.createElement("div");
     name.className = "unit-name";
     name.textContent = u.name;
@@ -1077,12 +968,8 @@ function renderSoldierCatalog(){
 
 /* SQUAD */
 function gearSummaryForOwner(owner){
-  let slots = [];
-  if(owner === "captain") slots = state.captainGearSlots;
-  if(owner === "firstMate") slots = state.firstMateGearSlots;
-
-  const names = slots.filter(Boolean).map(x => x.name);
-  return names.length ? names.join(", ") : "<span class='muted'>[vazio]</span>";
+  const arr = owner === "captain" ? state.captainEquipment : state.firstMateEquipment;
+  return arr.length ? arr.map(x => x.name).join(", ") : "<span class='muted'>[vazio]</span>";
 }
 
 function renderCaptainSlot(){
@@ -1263,7 +1150,6 @@ function renderAll(){
   updateAddButtons();
 }
 
-/* RESET */
 function resetAll(){
   const ok = confirm("Resetar tudo? Isso limpa Captain, First Mate, Equipment, Soldiers e créditos.");
   if(!ok) return;
@@ -1273,16 +1159,14 @@ function resetAll(){
     soldiers: [],
     captain: null,
     firstMate: null,
-    captainGearSlots: [null, null, null, null, null, null],
-    firstMateGearSlots: [null, null, null, null, null],
-    extraGearSlots: [null, null, null, null]
+    captainEquipment: [],
+    firstMateEquipment: []
   };
 
   captainChosen = { choose1: null, choose2: [] };
   firstMateChosen = { choose1: null, choose2: [] };
   captainSelectedPowers = [];
   firstMateSelectedPowers = [];
-  equipmentTarget = "captain";
 
   localStorage.removeItem(STORAGE_KEY);
 
@@ -1301,7 +1185,6 @@ function resetAll(){
   renderAll();
 }
 
-/* INIT */
 function init(){
   load();
 
@@ -1346,10 +1229,6 @@ function init(){
     updateAddButtons();
   });
   $("addFirstMateBtn").addEventListener("click", addFirstMateToSquad);
-
-  $("equipmentTargetCaptain").addEventListener("click", ()=> setEquipmentTarget("captain"));
-  $("equipmentTargetFirstMate").addEventListener("click", ()=> setEquipmentTarget("firstMate"));
-  $("equipmentTargetExtra").addEventListener("click", ()=> setEquipmentTarget("extra"));
 
   $("resetBtn").addEventListener("click", resetAll);
 
