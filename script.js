@@ -309,11 +309,8 @@ function makeHelpIcon(powerName){
   const desc = powerDescription(powerName);
 
   const html =
-    '<div style="font-weight:900; margin-bottom:6px;">' + powerName + '</div>' +
-    '<div style="opacity:.88; margin-bottom:8px; white-space:pre-wrap;">' + desc + '</div>' +
-    '<div style="opacity:.7; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \'Liberation Mono\', \'Courier New\', monospace;">' +
-      'Base: ' + (base ? base.activation : "—") + ' • Strain: ' + (base ? base.strain : "—") + ' • ' + (base ? base.category : "—") +
-    '</div>';
+  '<div style="font-weight:900; margin-bottom:6px;">' + powerName + '</div>' +
+  '<div style="opacity:.88; margin-bottom:8px; white-space:pre-wrap;">' + desc + '</div>';
 
   help.addEventListener("mouseenter", function(e){
     showTooltip(html, e.clientX, e.clientY);
