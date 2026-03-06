@@ -14,9 +14,7 @@
     </header>
 
     <main class="grid">
-      <!-- COLUNA ESQUERDA -->
       <section class="panel left">
-        <!-- CRÉDITOS -->
         <div class="card credits-card">
           <div class="credits-row">
             <div class="credits-label">Créditos</div>
@@ -89,12 +87,6 @@
               </div>
             </div>
           </div>
-
-          <div class="mini-card">
-            <div class="mini-title">Equipamentos</div>
-            <div class="muted small">Espaço reservado (vamos implementar depois).</div>
-            <textarea id="captainGear" class="textarea" rows="3" placeholder="Ex.: pistol, knife, medkit..."></textarea>
-          </div>
         </div>
 
         <!-- FIRST MATE -->
@@ -163,11 +155,43 @@
               </div>
             </div>
           </div>
+        </div>
 
-          <div class="mini-card">
-            <div class="mini-title">Equipamentos</div>
-            <div class="muted small">Espaço reservado (vamos implementar depois).</div>
-            <textarea id="firstMateGear" class="textarea" rows="3" placeholder="Ex.: carbine, frag grenades..."></textarea>
+        <!-- EQUIPMENT -->
+        <div class="card">
+          <div class="card-head">
+            <h2 class="card-title">Equipment</h2>
+          </div>
+
+          <div class="equipment-targets">
+            <span class="muted small">Destino:</span>
+            <button id="equipmentTargetCaptain" class="btn target-btn active">Captain</button>
+            <button id="equipmentTargetFirstMate" class="btn target-btn">First Mate</button>
+            <button id="equipmentTargetExtra" class="btn target-btn">Extra</button>
+          </div>
+
+          <div class="equipment-layout">
+            <div class="equipment-lists">
+              <div class="equipment-group">
+                <div class="mini-title small-title">EQUIPMENT</div>
+                <div id="equipmentListEquipment" class="power-list"></div>
+              </div>
+
+              <div class="equipment-group">
+                <div class="mini-title small-title">WEAPONS</div>
+                <div id="equipmentListWeapons" class="power-list"></div>
+              </div>
+
+              <div class="equipment-group">
+                <div class="mini-title small-title">ARMOUR</div>
+                <div id="equipmentListArmour" class="power-list"></div>
+              </div>
+            </div>
+
+            <div class="equipment-slots-wrapper">
+              <div class="mini-title small-title">SLOTS</div>
+              <div id="equipmentSlots" class="equipment-slot-grid"></div>
+            </div>
           </div>
         </div>
 
@@ -184,7 +208,6 @@
         </div>
       </section>
 
-      <!-- COLUNA DIREITA: SQUAD -->
       <aside class="panel right">
         <div class="card squad-card">
           <div class="card-head">
@@ -223,13 +246,11 @@
     </footer>
   </div>
 
-  <!-- ✅ Tooltip global flutuante -->
   <div id="globalTooltip" class="global-tooltip" aria-hidden="true"></div>
 
-  <!-- ✅ PROFISSIONAL: descrições em arquivo separado -->
   <script src="power-descriptions.js"></script>
-
-  <!-- ✅ lógica do app -->
+  <script src="equipment-list.js"></script>
+  <script src="equipment-descriptions.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
