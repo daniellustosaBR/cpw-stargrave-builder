@@ -558,3 +558,17 @@ body{
 @media (max-width: 980px){
   .grid{ grid-template-columns: 1fr; }
 }
+
+/* Dropdown de Background */
+
+select {
+  background-color: #020617;
+  color: #e2e8f0;
+  border: 1px solid #334155;
+}
+
+/* itens dentro do dropdown */
+select option {
+  background-color: #0b1f3a;
+  color: white;
+}
