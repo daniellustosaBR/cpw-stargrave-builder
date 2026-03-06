@@ -309,36 +309,48 @@ function renderStatChoices(targetId, bgName, chosen, onChange){
   const sm = bg.statMods || {};
   const fixedKeys = ["Move","Fight","Shoot","Armour","Will","Health"].filter(k => !!sm[k]);
 
+  const wrapper = document.createElement("div");
+  wrapper.className = "statmods-inline";
+
+  // FIXOS
   if(fixedKeys.length){
-    const fixed = document.createElement("div");
-    fixed.className = "choice-group";
-    fixed.innerHTML = '<div class="choice-title">Fixos</div>';
+    const fixedBlock = document.createElement("div");
+    fixedBlock.className = "statmods-block";
 
-    const row = document.createElement("div");
-    row.className = "choice-row";
+    const fixedLabel = document.createElement("div");
+    fixedLabel.className = "statmods-label";
+    fixedLabel.textContent = "FIXO:";
 
-    fixedKeys.forEach(k=>{
-      const pill = document.createElement("div");
-      pill.className = "pill-option";
-      pill.innerHTML = '<span>' + k + ' ' + (sm[k] >= 0 ? '+' + sm[k] : sm[k]) + '</span>';
-      row.appendChild(pill);
+    const fixedValues = document.createElement("div");
+    fixedValues.className = "statmods-values";
+
+    fixedKeys.forEach(k => {
+      const item = document.createElement("div");
+      item.className = "statmods-fixed-item";
+      item.textContent = k + " " + (sm[k] >= 0 ? "+" + sm[k] : sm[k]);
+      fixedValues.appendChild(item);
     });
 
-    fixed.appendChild(row);
-    container.appendChild(fixed);
+    fixedBlock.appendChild(fixedLabel);
+    fixedBlock.appendChild(fixedValues);
+    wrapper.appendChild(fixedBlock);
   }
 
+  // ESCOLHA 1
   if(sm.choose1){
-    const g = document.createElement("div");
-    g.className = "choice-group";
-    g.innerHTML = '<div class="choice-title">Escolha 1 (+1)</div>';
+    const choose1Block = document.createElement("div");
+    choose1Block.className = "statmods-block";
 
-    const row = document.createElement("div");
-    row.className = "choice-row";
+    const choose1Label = document.createElement("div");
+    choose1Label.className = "statmods-label";
+    choose1Label.textContent = "ESCOLHA 1 (+1):";
 
-    sm.choose1.forEach(opt=>{
+    const choose1Values = document.createElement("div");
+    choose1Values.className = "statmods-options";
+
+    sm.choose1.forEach(opt => {
       const label = document.createElement("label");
-      label.className = "pill-option";
+      label.className = "statmods-option";
 
       const input = document.createElement("input");
       input.type = "radio";
@@ -352,24 +364,29 @@ function renderStatChoices(targetId, bgName, chosen, onChange){
 
       label.appendChild(input);
       label.appendChild(document.createTextNode(opt + " +1"));
-      row.appendChild(label);
+      choose1Values.appendChild(label);
     });
 
-    g.appendChild(row);
-    container.appendChild(g);
+    choose1Block.appendChild(choose1Label);
+    choose1Block.appendChild(choose1Values);
+    wrapper.appendChild(choose1Block);
   }
 
+  // ESCOLHA 2
   if(sm.choose2){
-    const g = document.createElement("div");
-    g.className = "choice-group";
-    g.innerHTML = '<div class="choice-title">Escolha 2 (+1 cada)</div>';
+    const choose2Block = document.createElement("div");
+    choose2Block.className = "statmods-block";
 
-    const row = document.createElement("div");
-    row.className = "choice-row";
+    const choose2Label = document.createElement("div");
+    choose2Label.className = "statmods-label";
+    choose2Label.textContent = "ESCOLHA 2 (+1 CADA):";
 
-    sm.choose2.forEach(opt=>{
+    const choose2Values = document.createElement("div");
+    choose2Values.className = "statmods-options";
+
+    sm.choose2.forEach(opt => {
       const label = document.createElement("label");
-      label.className = "pill-option";
+      label.className = "statmods-option";
 
       const input = document.createElement("input");
       input.type = "checkbox";
@@ -391,16 +408,20 @@ function renderStatChoices(targetId, bgName, chosen, onChange){
 
       label.appendChild(input);
       label.appendChild(document.createTextNode(opt + " +1"));
-      row.appendChild(label);
+      choose2Values.appendChild(label);
     });
 
-    g.appendChild(row);
-    container.appendChild(g);
+    choose2Block.appendChild(choose2Label);
+    choose2Block.appendChild(choose2Values);
+    wrapper.appendChild(choose2Block);
   }
 
   if(!fixedKeys.length && !sm.choose1 && !sm.choose2){
     container.innerHTML = '<div class="muted small">Sem modificações especiais.</div>';
+    return;
   }
+
+  container.appendChild(wrapper);
 }
 
 function sortedPowersForBackground(bgName, search, selectedArray){
@@ -451,11 +472,22 @@ function equipmentBadgeText(type){
 }
 
 function allEquipmentMerged(){
+  const typeOrder = {
+    equipment: 1,
+    weapon: 2,
+    armour: 3
+  };
+
   return [
     ...(equipmentData.equipment || []).map(x => ({ name: x.name, type: "equipment" })),
     ...(equipmentData.weapons || []).map(x => ({ name: x.name, type: "weapon" })),
     ...(equipmentData.armour || []).map(x => ({ name: x.name, type: "armour" }))
-  ].sort((a,b)=> a.name.localeCompare(b.name));
+  ].sort((a, b) => {
+    if (typeOrder[a.type] !== typeOrder[b.type]) {
+      return typeOrder[a.type] - typeOrder[b.type];
+    }
+    return a.name.localeCompare(b.name);
+  });
 }
 
 function hasArmour(equipmentArray){
@@ -505,7 +537,7 @@ function renderEquipmentList(targetId, owner){
 function addEquipmentToOwner(owner, item){
   if(owner === "captain"){
     if(state.captainEquipment.length >= 6){
-      alert("Captain só pode ter 6 equipamentos.");
+      alert("O limite máximo de itens para o Captain é 6.");
       return;
     }
     if(item.type === "armour" && hasArmour(state.captainEquipment)){
@@ -517,7 +549,7 @@ function addEquipmentToOwner(owner, item){
 
   if(owner === "firstMate"){
     if(state.firstMateEquipment.length >= 5){
-      alert("First Mate só pode ter 5 equipamentos.");
+      alert("O limite máximo de itens para o First Mate é 5.");
       return;
     }
     if(item.type === "armour" && hasArmour(state.firstMateEquipment)){
@@ -550,38 +582,54 @@ function renderSelectedEquipment(owner, targetId){
   out.innerHTML = "";
 
   const selected = owner === "captain" ? state.captainEquipment : state.firstMateEquipment;
+  const maxSlots = owner === "captain" ? 6 : 5;
 
-  selected.forEach(item=>{
-    const type = equipmentCategory(item.name);
+  for(let i = 0; i < maxSlots; i++){
+    const item = selected[i];
 
     const row = document.createElement("div");
-    row.className = "power-item";
+    row.className = "power-item equipment-slot-item";
 
-    const left = document.createElement("div");
-    left.className = "power-left";
+    if(item){
+      const type = equipmentCategory(item.name);
 
-    left.appendChild(makeEquipmentHelpIcon(item.name));
+      const left = document.createElement("div");
+      left.className = "power-left";
 
-    const name = document.createElement("div");
-    name.className = "power-name";
-    name.textContent = item.name;
+      left.appendChild(makeEquipmentHelpIcon(item.name));
 
-    const badge = document.createElement("span");
-    badge.className = "badge-item " + equipmentBadgeClass(type);
-    badge.textContent = equipmentBadgeText(type);
-    name.appendChild(badge);
+      const name = document.createElement("div");
+      name.className = "power-name";
+      name.textContent = item.name;
 
-    left.appendChild(name);
+      const badge = document.createElement("span");
+      badge.className = "badge-item " + equipmentBadgeClass(type);
+      badge.textContent = equipmentBadgeText(type);
+      name.appendChild(badge);
 
-    const btn = document.createElement("button");
-    btn.className = "btn danger";
-    btn.textContent = "REMOVER";
-    btn.addEventListener("click", ()=> removeEquipmentFromOwner(owner, item.name));
+      left.appendChild(name);
 
-    row.appendChild(left);
-    row.appendChild(btn);
+      const btn = document.createElement("button");
+      btn.className = "btn danger";
+      btn.textContent = "REMOVER";
+      btn.addEventListener("click", ()=>{
+        removeEquipmentFromOwner(owner, item.name);
+      });
+
+      row.appendChild(left);
+      row.appendChild(btn);
+    } else {
+      row.classList.add("equipment-empty-slot");
+
+      const empty = document.createElement("div");
+      empty.className = "muted small";
+      empty.textContent = "Slot vazio";
+
+      row.appendChild(empty);
+    }
+
     out.appendChild(row);
-  });
+  }
 }
 
 function renderEquipmentAll(){
